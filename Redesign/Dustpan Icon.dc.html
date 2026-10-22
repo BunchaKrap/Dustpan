@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>
+  html, body { margin: 0; padding: 0; }
+  body { background: #e6e2dc; -webkit-font-smoothing: antialiased; }
+  a { color: #a8703c; text-decoration: none; }
+  a:hover { color: #8a5a2c; text-decoration: underline; }
+</style>
+</helmet>
+
+<div style="padding: 40px 44px 64px; display: flex; flex-direction: column; gap: 28px; background: var(--surface, #e6e2dc); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, sans-serif; color: #1d1d1f;">
+
+  <section style="display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: flex; flex-direction: column; gap: 5px; max-width: 740px;">
+      <div style="font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #8b857e;">Turn 1 · App icon</div>
+      <div style="font-size: 26px; font-weight: 650; letter-spacing: -.01em; white-space: nowrap;">Dustpan — icon directions</div>
+      <div style="font-size: 13.5px; line-height: 1.55; color: #6f6a64;">One base geometry, four treatments: a low wide scoop in the bottom half of the grid, front lip flaring out to meet the floor, a back wall for depth, and the handle rising from the back. Big Sur rounded-square, 1024 master. Each card repeats the same paths at 96 / 64 / 32 / 16 px to check Finder and menu-bar legibility.</div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start;">
+
+      <!-- 1a -->
+      <div id="1a" style="width: 316px; display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 16px; background: #fbfaf8; box-shadow: 0 1px 3px rgba(0,0,0,.07), 0 12px 32px -18px rgba(0,0,0,.35);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; padding: 3px 7px; border-radius: 5px; background: #efe9e0; color: #8a5a2c;">1a</div>
+          <div style="font-size: 13.5px; font-weight: 600; white-space: nowrap;">Sweep</div>
+          <div style="font-size: 11.5px; color: #8b857e; white-space: nowrap;">warm gradient · sparkles</div>
+        </div>
+
+        <div style="align-self: center; width: 180px; height: 180px; border-radius: 40px; display: grid; place-items: center; background: linear-gradient(162deg, #d79a54 0%, #b4753a 48%, #905a2a 100%); box-shadow: 0 1px 0 rgba(255,255,255,.4) inset, 0 10px 24px -8px rgba(120,74,32,.55);">
+          <svg width="126" height="126" viewBox="0 0 100 100" fill="#fff8f0">
+            <path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".68"></path>
+            <path d="M22 52h56l14 26H8z"></path>
+            <path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path>
+            <rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect>
+            <path d="M22 13l3.2 7.6 7.6 3.2-7.6 3.2L22 34.6l-3.2-7.6L11.2 24l7.6-3.2z"></path>
+            <path d="M43 5l2 4.6 4.6 2-4.6 2L43 18.2l-2-4.6-4.6-2 4.6-2z"></path>
+          </svg>
+        </div>
+
+        <div style="display: flex; align-items: flex-end; justify-content: center; gap: 18px; padding: 10px 0 4px;">
+          <div style="width: 96px; height: 96px; border-radius: 21px; display: grid; place-items: center; background: linear-gradient(162deg, #d79a54 0%, #b4753a 48%, #905a2a 100%);">
+            <svg width="67" height="67" viewBox="0 0 100 100" fill="#fff8f0"><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".68"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect><path d="M22 13l3.2 7.6 7.6 3.2-7.6 3.2L22 34.6l-3.2-7.6L11.2 24l7.6-3.2z"></path><path d="M43 5l2 4.6 4.6 2-4.6 2L43 18.2l-2-4.6-4.6-2 4.6-2z"></path></svg>
+          </div>
+          <div style="width: 64px; height: 64px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(162deg, #d79a54 0%, #b4753a 48%, #905a2a 100%);">
+            <svg width="45" height="45" viewBox="0 0 100 100" fill="#fff8f0"><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".68"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect><path d="M22 13l3.2 7.6 7.6 3.2-7.6 3.2L22 34.6l-3.2-7.6L11.2 24l7.6-3.2z"></path></svg>
+          </div>
+          <div style="width: 32px; height: 32px; border-radius: 7px; display: grid; place-items: center; background: linear-gradient(162deg, #d79a54 0%, #b4753a 48%, #905a2a 100%);">
+            <svg width="23" height="23" viewBox="0 0 100 100" fill="#fff8f0"><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".68"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect></svg>
+          </div>
+          <div style="width: 16px; height: 16px; border-radius: 4px; display: grid; place-items: center; background: linear-gradient(162deg, #d79a54, #905a2a);">
+            <svg width="12" height="12" viewBox="0 0 100 100" fill="#fff8f0"><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect></svg>
+          </div>
+        </div>
+        <div style="font-size: 11.5px; line-height: 1.5; color: #8b857e;">The house direction — warmest, most "utility app". Sparkles thin out below 64 px and the back wall drops at 16 so the scoop stays crisp.</div>
+      </div>
+
+      <!-- 1b -->
+      <div id="1b" style="width: 316px; display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 16px; background: #fbfaf8; box-shadow: 0 1px 3px rgba(0,0,0,.07), 0 12px 32px -18px rgba(0,0,0,.35);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; padding: 3px 7px; border-radius: 5px; background: #efe9e0; color: #8a5a2c;">1b</div>
+          <div style="font-size: 13.5px; font-weight: 600; white-space: nowrap;">Paper</div>
+          <div style="font-size: 11.5px; color: #8b857e; white-space: nowrap;">light ground · pan + brush</div>
+        </div>
+
+        <div style="align-self: center; width: 180px; height: 180px; border-radius: 40px; display: grid; place-items: center; background: linear-gradient(170deg, #faf6ef 0%, #e8ddcb 100%); box-shadow: 0 0 0 .5px rgba(0,0,0,.1) inset, 0 10px 24px -10px rgba(90,70,45,.35);">
+          <svg width="126" height="126" viewBox="0 0 100 100" fill="#8a5a2c">
+            <rect x="4" y="10" width="13" height="23" rx="4.5" transform="rotate(-20 10.5 21.5)" fill="#c98b4b"></rect>
+            <path d="M9 35.5l4.6 6.6" stroke="#a8703c" stroke-width="3.4" stroke-linecap="round"></path>
+            <path d="M15.5 32.5l4.2 6" stroke="#a8703c" stroke-width="3.4" stroke-linecap="round"></path>
+            <path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".55"></path>
+            <path d="M22 52h56l14 26H8z"></path>
+            <path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path>
+            <rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)" fill="#b4753a"></rect>
+          </svg>
+        </div>
+
+        <div style="display: flex; align-items: flex-end; justify-content: center; gap: 18px; padding: 10px 0 4px;">
+          <div style="width: 96px; height: 96px; border-radius: 21px; display: grid; place-items: center; background: linear-gradient(170deg, #faf6ef 0%, #e8ddcb 100%); box-shadow: 0 0 0 .5px rgba(0,0,0,.1) inset;">
+            <svg width="67" height="67" viewBox="0 0 100 100" fill="#8a5a2c"><rect x="4" y="10" width="13" height="23" rx="4.5" transform="rotate(-20 10.5 21.5)" fill="#c98b4b"></rect><path d="M9 35.5l4.6 6.6" stroke="#a8703c" stroke-width="3.4" stroke-linecap="round"></path><path d="M15.5 32.5l4.2 6" stroke="#a8703c" stroke-width="3.4" stroke-linecap="round"></path><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".55"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)" fill="#b4753a"></rect></svg>
+          </div>
+          <div style="width: 64px; height: 64px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(170deg, #faf6ef 0%, #e8ddcb 100%); box-shadow: 0 0 0 .5px rgba(0,0,0,.1) inset;">
+            <svg width="45" height="45" viewBox="0 0 100 100" fill="#8a5a2c"><rect x="4" y="10" width="13" height="23" rx="4.5" transform="rotate(-20 10.5 21.5)" fill="#c98b4b"></rect><path d="M9 35.5l4.6 6.6" stroke="#a8703c" stroke-width="3.4" stroke-linecap="round"></path><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".55"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)" fill="#b4753a"></rect></svg>
+          </div>
+          <div style="width: 32px; height: 32px; border-radius: 7px; display: grid; place-items: center; background: #f2ebde; box-shadow: 0 0 0 .5px rgba(0,0,0,.1) inset;">
+            <svg width="23" height="23" viewBox="0 0 100 100" fill="#8a5a2c"><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".55"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect></svg>
+          </div>
+          <div style="width: 16px; height: 16px; border-radius: 4px; display: grid; place-items: center; background: #f2ebde; box-shadow: 0 0 0 .5px rgba(0,0,0,.14) inset;">
+            <svg width="12" height="12" viewBox="0 0 100 100" fill="#8a5a2c"><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect></svg>
+          </div>
+        </div>
+        <div style="font-size: 11.5px; line-height: 1.5; color: #8b857e;">Quietest of the four and the most native next to Finder. The brush sits clear of the pan on the left and drops entirely at 32 px and below.</div>
+      </div>
+
+      <!-- 1c -->
+      <div id="1c" style="width: 316px; display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 16px; background: #fbfaf8; box-shadow: 0 1px 3px rgba(0,0,0,.07), 0 12px 32px -18px rgba(0,0,0,.35);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; padding: 3px 7px; border-radius: 5px; background: #efe9e0; color: #8a5a2c;">1c</div>
+          <div style="font-size: 13.5px; font-weight: 600; white-space: nowrap;">Catch</div>
+          <div style="font-size: 11.5px; color: #8b857e; white-space: nowrap;">dark slate · dust falling in</div>
+        </div>
+
+        <div style="align-self: center; width: 180px; height: 180px; border-radius: 40px; display: grid; place-items: center; background: linear-gradient(162deg, #45444a 0%, #2c2b30 55%, #1c1b1f 100%); box-shadow: 0 1px 0 rgba(255,255,255,.14) inset, 0 10px 24px -8px rgba(0,0,0,.6);">
+          <svg width="126" height="126" viewBox="0 0 100 100" fill="#e9c49a">
+            <circle cx="34" cy="20" r="6" fill="#8d8a93"></circle>
+            <circle cx="53" cy="10" r="4.2" fill="#8d8a93"></circle>
+            <circle cx="65" cy="24" r="3.2" fill="#8d8a93"></circle>
+            <path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".6"></path>
+            <path d="M22 52h56l14 26H8z"></path>
+            <path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path>
+            <rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect>
+          </svg>
+        </div>
+
+        <div style="display: flex; align-items: flex-end; justify-content: center; gap: 18px; padding: 10px 0 4px;">
+          <div style="width: 96px; height: 96px; border-radius: 21px; display: grid; place-items: center; background: linear-gradient(162deg, #45444a 0%, #2c2b30 55%, #1c1b1f 100%);">
+            <svg width="67" height="67" viewBox="0 0 100 100" fill="#e9c49a"><circle cx="34" cy="20" r="6" fill="#8d8a93"></circle><circle cx="53" cy="10" r="4.2" fill="#8d8a93"></circle><circle cx="65" cy="24" r="3.2" fill="#8d8a93"></circle><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".6"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect></svg>
+          </div>
+          <div style="width: 64px; height: 64px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(162deg, #45444a 0%, #2c2b30 55%, #1c1b1f 100%);">
+            <svg width="45" height="45" viewBox="0 0 100 100" fill="#e9c49a"><circle cx="34" cy="20" r="6" fill="#8d8a93"></circle><circle cx="53" cy="10" r="4.2" fill="#8d8a93"></circle><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".6"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect></svg>
+          </div>
+          <div style="width: 32px; height: 32px; border-radius: 7px; display: grid; place-items: center; background: linear-gradient(162deg, #45444a, #232226);">
+            <svg width="23" height="23" viewBox="0 0 100 100" fill="#e9c49a"><circle cx="40" cy="20" r="6.5" fill="#8d8a93"></circle><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".6"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect></svg>
+          </div>
+          <div style="width: 16px; height: 16px; border-radius: 4px; display: grid; place-items: center; background: #26252a;">
+            <svg width="12" height="12" viewBox="0 0 100 100" fill="#e9c49a"><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect></svg>
+          </div>
+        </div>
+        <div style="font-size: 11.5px; line-height: 1.5; color: #8b857e;">Reads as a developer tool and holds up best on a busy wallpaper. The falling dust tells the story without a single sparkle.</div>
+      </div>
+
+      <!-- 1d -->
+      <div id="1d" style="width: 316px; display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 16px; background: #fbfaf8; box-shadow: 0 1px 3px rgba(0,0,0,.07), 0 12px 32px -18px rgba(0,0,0,.35);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; padding: 3px 7px; border-radius: 5px; background: #efe9e0; color: #8a5a2c;">1d</div>
+          <div style="font-size: 13.5px; font-weight: 600; white-space: nowrap;">Mark</div>
+          <div style="font-size: 11.5px; color: #8b857e; white-space: nowrap;">sage · solid silhouette</div>
+        </div>
+
+        <div style="align-self: center; width: 180px; height: 180px; border-radius: 40px; display: grid; place-items: center; background: linear-gradient(162deg, #6f8f7c 0%, #4c6b5b 52%, #354c40 100%); box-shadow: 0 1px 0 rgba(255,255,255,.22) inset, 0 10px 24px -8px rgba(40,70,55,.55);">
+          <svg width="126" height="126" viewBox="0 0 100 100" fill="#ffffff">
+            <path d="M24 34h52a5 5 0 015 5v13H19V39a5 5 0 015-5z"></path>
+            <path d="M19 52h62l15 26H4z"></path>
+            <path d="M4 78h92a4 4 0 014 4v2a4 4 0 01-4 4H4a4 4 0 01-4-4v-2a4 4 0 014-4z"></path>
+            <rect x="72" y="0" width="12" height="36" rx="6" transform="rotate(20 78 18)"></rect>
+          </svg>
+        </div>
+
+        <div style="display: flex; align-items: flex-end; justify-content: center; gap: 18px; padding: 10px 0 4px;">
+          <div style="width: 96px; height: 96px; border-radius: 21px; display: grid; place-items: center; background: linear-gradient(162deg, #6f8f7c 0%, #4c6b5b 52%, #354c40 100%);">
+            <svg width="67" height="67" viewBox="0 0 100 100" fill="#ffffff"><path d="M24 34h52a5 5 0 015 5v13H19V39a5 5 0 015-5z"></path><path d="M19 52h62l15 26H4z"></path><path d="M4 78h92a4 4 0 014 4v2a4 4 0 01-4 4H4a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="72" y="0" width="12" height="36" rx="6" transform="rotate(20 78 18)"></rect></svg>
+          </div>
+          <div style="width: 64px; height: 64px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(162deg, #6f8f7c 0%, #4c6b5b 52%, #354c40 100%);">
+            <svg width="45" height="45" viewBox="0 0 100 100" fill="#ffffff"><path d="M24 34h52a5 5 0 015 5v13H19V39a5 5 0 015-5z"></path><path d="M19 52h62l15 26H4z"></path><path d="M4 78h92a4 4 0 014 4v2a4 4 0 01-4 4H4a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="72" y="0" width="12" height="36" rx="6" transform="rotate(20 78 18)"></rect></svg>
+          </div>
+          <div style="width: 32px; height: 32px; border-radius: 7px; display: grid; place-items: center; background: linear-gradient(162deg, #6f8f7c, #3f5a4c);">
+            <svg width="23" height="23" viewBox="0 0 100 100" fill="#ffffff"><path d="M24 34h52a5 5 0 015 5v13H19V39a5 5 0 015-5z"></path><path d="M19 52h62l15 26H4z"></path><path d="M4 78h92a4 4 0 014 4v2a4 4 0 01-4 4H4a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="72" y="0" width="12" height="36" rx="6" transform="rotate(20 78 18)"></rect></svg>
+          </div>
+          <div style="width: 16px; height: 16px; border-radius: 4px; display: grid; place-items: center; background: #4c6b5b;">
+            <svg width="12" height="12" viewBox="0 0 100 100" fill="#ffffff"><path d="M24 34h52a5 5 0 015 5v13H19V39a5 5 0 015-5z"></path><path d="M19 52h62l15 26H4z"></path><path d="M4 78h92a4 4 0 014 4v2a4 4 0 01-4 4H4a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="72" y="0" width="12" height="36" rx="6" transform="rotate(20 78 18)"></rect></svg>
+          </div>
+        </div>
+        <div style="font-size: 11.5px; line-height: 1.5; color: #8b857e;">Same geometry pushed to the edges with a heavier handle — the clearest read at 16 px, and the only one that survives as a monochrome template.</div>
+      </div>
+    </div>
+
+    <!-- in situ -->
+    <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch;">
+      <div style="flex: 1; min-width: 380px; padding: 20px 22px; border-radius: 16px; background: #fbfaf8; box-shadow: 0 1px 3px rgba(0,0,0,.07), 0 12px 32px -18px rgba(0,0,0,.35); display: flex; flex-direction: column; gap: 14px;">
+        <div style="font-size: 12.5px; font-weight: 600; white-space: nowrap;">In the Dock, all four together</div>
+        <div style="display: flex; justify-content: center; gap: 12px; padding: 12px 18px; border-radius: 20px; background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.3)); box-shadow: 0 0 0 .5px rgba(0,0,0,.12) inset, 0 8px 20px -10px rgba(0,0,0,.4); backdrop-filter: blur(10px);">
+          <div style="width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(162deg, #d79a54, #905a2a);">
+            <svg width="38" height="38" viewBox="0 0 100 100" fill="#fff8f0"><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".68"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect><path d="M22 13l3.2 7.6 7.6 3.2-7.6 3.2L22 34.6l-3.2-7.6L11.2 24l7.6-3.2z"></path></svg>
+          </div>
+          <div style="width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(170deg, #faf6ef, #e8ddcb); box-shadow: 0 0 0 .5px rgba(0,0,0,.1) inset;">
+            <svg width="38" height="38" viewBox="0 0 100 100" fill="#8a5a2c"><rect x="4" y="10" width="13" height="23" rx="4.5" transform="rotate(-20 10.5 21.5)" fill="#c98b4b"></rect><path d="M9 35.5l4.6 6.6" stroke="#a8703c" stroke-width="3.4" stroke-linecap="round"></path><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".55"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)" fill="#b4753a"></rect></svg>
+          </div>
+          <div style="width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(162deg, #45444a, #1c1b1f);">
+            <svg width="38" height="38" viewBox="0 0 100 100" fill="#e9c49a"><circle cx="34" cy="20" r="6" fill="#8d8a93"></circle><circle cx="53" cy="10" r="4.2" fill="#8d8a93"></circle><path d="M26 38h48a4 4 0 014 4v10H22V42a4 4 0 014-4z" opacity=".6"></path><path d="M22 52h56l14 26H8z"></path><path d="M8 78h84a4 4 0 014 4v2a4 4 0 01-4 4H8a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="74" y="2" width="10" height="36" rx="5" transform="rotate(20 79 20)"></rect></svg>
+          </div>
+          <div style="width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(162deg, #6f8f7c, #354c40);">
+            <svg width="38" height="38" viewBox="0 0 100 100" fill="#fff"><path d="M24 34h52a5 5 0 015 5v13H19V39a5 5 0 015-5z"></path><path d="M19 52h62l15 26H4z"></path><path d="M4 78h92a4 4 0 014 4v2a4 4 0 01-4 4H4a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="72" y="0" width="12" height="36" rx="6" transform="rotate(20 78 18)"></rect></svg>
+          </div>
+        </div>
+        <div style="font-size: 11.5px; line-height: 1.5; color: #8b857e;">At Dock size the scoop silhouette carries all four; 1b needs its ground darkened a step if it ships.</div>
+      </div>
+
+      <div style="flex: 1; min-width: 340px; padding: 20px 22px; border-radius: 16px; background: #fbfaf8; box-shadow: 0 1px 3px rgba(0,0,0,.07), 0 12px 32px -18px rgba(0,0,0,.35); display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-size: 12.5px; font-weight: 600; white-space: nowrap;">Menu-bar template (monochrome, 18 px)</div>
+        <div style="display: flex; align-items: center; gap: 14px; height: 30px; padding: 0 14px; border-radius: 8px; background: rgba(255,255,255,.7); box-shadow: 0 0 0 .5px rgba(0,0,0,.1) inset;">
+          <svg width="19" height="19" viewBox="0 0 100 100" fill="#1d1d1f"><path d="M24 34h52a5 5 0 015 5v13H19V39a5 5 0 015-5z"></path><path d="M19 52h62l15 26H4z"></path><path d="M4 78h92a4 4 0 014 4v2a4 4 0 01-4 4H4a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="72" y="0" width="12" height="36" rx="6" transform="rotate(20 78 18)"></rect></svg>
+          <span style="font-size: 12px; color: #6f6a64; white-space: nowrap;">11.8 GB reclaimable</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; height: 30px; padding: 0 14px; border-radius: 8px; background: #26252a;">
+          <svg width="19" height="19" viewBox="0 0 100 100" fill="#f2f1ef"><path d="M24 34h52a5 5 0 015 5v13H19V39a5 5 0 015-5z"></path><path d="M19 52h62l15 26H4z"></path><path d="M4 78h92a4 4 0 014 4v2a4 4 0 01-4 4H4a4 4 0 01-4-4v-2a4 4 0 014-4z"></path><rect x="72" y="0" width="12" height="36" rx="6" transform="rotate(20 78 18)"></rect></svg>
+          <span style="font-size: 12px; color: #948f89; white-space: nowrap;">11.8 GB reclaimable</span>
+        </div>
+        <div style="font-size: 11.5px; line-height: 1.5; color: #8b857e;">Only the 1d silhouette works as a template asset — the shape I'd keep for the menu bar whichever full-colour icon wins.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;surface&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;light&quot;, &quot;warm&quot;, &quot;cool&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;light&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Presentation&quot;}}">
+const SURFACES = { light: "#e6e2dc", warm: "#efe7db", cool: "#e3e5e6", dark: "#2b2a28" };
+
+class Component extends DCLogic {
+  componentDidMount() { this.applyVars(); }
+  componentDidUpdate() { this.applyVars(); }
+  applyVars() {
+    const s = SURFACES[this.props.surface] || SURFACES.light;
+    document.documentElement.style.setProperty("--surface", s);
+    document.body.style.background = s;
+  }
+  renderVals() { return {}; }
+}
+
+</script>
+</body>
+</html>
