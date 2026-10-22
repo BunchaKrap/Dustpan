@@ -28,7 +28,8 @@ public struct ReleaseInfo: Sendable, Equatable {
 
 public enum UpdateError: Error, CustomStringConvertible, Sendable {
     case notConfigured
-    case noRelease
+    case noRelease(String)
+    case repoUnavailable(String)
     case noDownload
     case http(Int)
     case checksumMismatch
@@ -39,7 +40,8 @@ public enum UpdateError: Error, CustomStringConvertible, Sendable {
     public var description: String {
         switch self {
         case .notConfigured: "Updates aren't set up for this build yet."
-        case .noRelease: "No releases have been published yet."
+        case .noRelease(let repo): "github.com/\(repo) hasn't published a release yet."
+        case .repoUnavailable(let repo): "github.com/\(repo) couldn't be found. It may be private or renamed; the updater can only read public repositories."
         case .noDownload: "The latest release has no macOS download attached."
         case .http(let code): code == 403 ? "GitHub is rate-limiting requests. Try again in a few minutes." : "GitHub returned an error (\(code))."
         case .checksumMismatch: "The download didn't match its published checksum, so it wasn't installed."
@@ -72,15 +74,24 @@ public struct GitHubUpdater: Sendable {
     // MARK: Checking
 
     public func latestRelease() async throws -> ReleaseInfo {
-        guard isConfigured, let url = URL(string: "https://api.github.com/repos/\(repo)/releases/latest") else { throw UpdateError.notConfigured }
+        guard isConfigured else { throw UpdateError.notConfigured }
+        let (data, status) = try await get("releases/latest")
+        if status == 404 {
+            // GitHub answers 404 both for "no releases" and for a private or missing repo; ask about the repo to tell them apart.
+            let (_, repoStatus) = try await get("")
+            throw repoStatus == 200 ? UpdateError.noRelease(repo) : UpdateError.repoUnavailable(repo)
+        }
+        guard status == 200 else { throw UpdateError.http(status) }
+        return try Self.parseRelease(data)
+    }
+
+    private func get(_ path: String) async throws -> (Data, Int) {
+        guard let url = URL(string: "https://api.github.com/repos/\(repo)" + (path.isEmpty ? "" : "/\(path)")) else { throw UpdateError.notConfigured }
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         request.setValue("Dustpan-Updater", forHTTPHeaderField: "User-Agent")
         let (data, response) = try await URLSession.shared.data(for: request)
-        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-        if status == 404 { throw UpdateError.noRelease }
-        guard status == 200 else { throw UpdateError.http(status) }
-        return try Self.parseRelease(data)
+        return (data, (response as? HTTPURLResponse)?.statusCode ?? 0)
     }
 
     /// Reads GitHub's `releases/latest` JSON. Prefers a `*-macOS.zip` asset, else any `.zip`.

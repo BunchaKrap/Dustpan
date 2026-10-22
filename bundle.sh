@@ -7,8 +7,8 @@ CONFIG="${1:-release}"
 APP_NAME="Dustpan"
 BUNDLE_ID="com.local.dustpan"
 VERSION="${DUSTPAN_VERSION:-0.2.0}"
-# GitHub repo the in-app updater checks (owner/name). Must be public. Empty disables updates.
-UPDATE_REPO="${DUSTPAN_REPO:-}"
+# GitHub repo the in-app updater checks (owner/name). Releases must be publicly readable.
+UPDATE_REPO="${DUSTPAN_REPO:-BunchaKrap/Dustpan}"
 APP="build/${APP_NAME}.app"
 ICON_STYLE="${DUSTPAN_ICON:-sweep}"   # Finder icon: sweep | paper | catch | mark
 

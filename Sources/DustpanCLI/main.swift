@@ -383,6 +383,21 @@ case "dupes":
         print("  \(pad(group.wastedBytes.formattedBytes, 10)) \(group.files.count)× \(group.name)")
         for file in group.files { print("      \(file.url.path)") }
     }
+case "update-check":
+    // dustpan-cli update-check [owner/name]: what the in-app button would find.
+    let repo = args.dropFirst().first { !$0.hasPrefix("--") } ?? "BunchaKrap/Dustpan"
+    do {
+        let release = try await GitHubUpdater(repo: repo, bundleIdentifier: "com.local.dustpan").latestRelease()
+        print("Latest release at \(repo): \(release.version) · \(release.downloadURL.lastPathComponent) · \(release.digest ?? "no digest")")
+        if args.contains("--download") {
+            // Runs the same download, checksum, unpack and signature checks as the app, without installing.
+            let staged = try await GitHubUpdater(repo: repo, bundleIdentifier: "com.local.dustpan").downloadAndStage(release)
+            print("Downloaded, verified and staged: \(staged.path)")
+        }
+    } catch {
+        print("\(repo): \(error)")
+        exit(1)
+    }
 case "history":
     for session in DeletionHistory.sessions(DeletionHistory.load()).prefix(20) {
         print("\(session.date.formatted())  \(pad(session.source ?? "-", 12)) \(pad(session.bytesMoved.formattedBytes, 10)) \(session.trashed.count) items")
@@ -415,6 +430,7 @@ default:
       disk [folder]      largest items in a folder (default ~)
       dupes [folder]     find identical files (default ~, 1 MB and up)
       history            recent cleanups from the deletion log
+      update-check [repo] [--download]  what Check for Updates would find (default BunchaKrap/Dustpan)
       apps [name]        list apps, or show an app's leftover files
       selftest           run core checks in a temporary folder
       log                print the deletion log path
