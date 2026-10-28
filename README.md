@@ -84,6 +84,12 @@ Every cleanup, grouped by session and source (Cleanup, Disk Space, Duplicates, U
 
 Lists apps in `/Applications`. Selecting one finds its leftovers by bundle identifier — preferences, caches, Application Support folders, logs, saved state — so removing an app removes all of it, not just the `.app`.
 
+### 4. Activity (working)
+
+Every running process, including background ones, with live CPU and memory (sampled every 3 s, only while the screen is open). For each process Dustpan shows what it is (plain-English notes for common macOS processes), the app it belongs to, who it runs as, whether a launch agent or daemon starts it and keeps it alive, and who signed it.
+
+It flags warning signs rather than claiming to detect malware: a broken signature, a certificate Apple didn't issue (how cracked apps are re-signed), a macOS process name without Apple's signature, running from a temporary, shared or hidden folder, a program file deleted while running, and unverified programs that start automatically (Homebrew services excepted). Quit sends the same request as quitting from the Dock; Force Quit ends the process. Processes that would log you out or freeze the screen (WindowServer, loginwindow, launchd…) can't be stopped, and the confirmation says when launchd will simply restart something. `dustpan-cli processes [--all]` runs the same checks in Terminal.
+
 ---
 
 ## How it works

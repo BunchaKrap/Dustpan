@@ -90,8 +90,8 @@ struct DuplicatesView: View {
                 }
 
                 Text("Hidden files, app bundles, Photos libraries and ~/Library are skipped, because their contents are managed by apps.")
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(palette.text3)
+                    .font(.system(size: 12))
+                    .foregroundStyle(palette.text2)
             }
             .padding(.horizontal, 28)
             .padding(.vertical, 24)

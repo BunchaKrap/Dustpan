@@ -50,6 +50,9 @@ private struct DPButtonBody: View {
     var body: some View {
         configuration.label
             .font(.system(size: style.fontSize, weight: style.kind == .secondary ? .regular : .medium))
+            // A button label never wraps; the layout around it has to make room instead.
+            .lineLimit(1)
+            .fixedSize()
             .foregroundStyle(style.kind == .secondary ? palette.text : Color.white)
             .padding(.horizontal, style.horizontalPadding)
             .frame(height: style.height)

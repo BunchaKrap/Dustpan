@@ -189,16 +189,21 @@ struct UninstallerView: View {
         let selected = model.checkedLeftovers
         let blocked = app.isSystemApp || model.isRunning(app)
         return HStack(spacing: 12) {
-            Text("\(selected.count) of \(model.leftovers.count) items selected · \(model.checkedBytes.formattedBytes)")
-                .font(.system(size: 12.5))
-                .monospacedDigit()
-                .foregroundStyle(palette.text2)
-            if !selected.contains(where: \.isApplication), !selected.isEmpty {
-                Text("App bundle not selected: only leftovers will be removed")
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(Palette.warnInk)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(selected.count) of \(model.leftovers.count) selected · \(model.checkedBytes.formattedBytes)")
+                    .font(.system(size: 12.5))
+                    .monospacedDigit()
+                    .foregroundStyle(palette.text2)
+                    .lineLimit(1)
+                if !selected.contains(where: \.isApplication), !selected.isEmpty {
+                    Text("App not selected: only leftovers will be removed")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(Palette.warnInk)
+                        .lineLimit(1)
+                }
             }
-            Spacer()
+            .truncationMode(.tail)
+            Spacer(minLength: 12)
             Button { isConfirming = true } label: {
                 HStack(spacing: 8) {
                     GlyphView(.trash, size: 15, lineWidth: 1.5)

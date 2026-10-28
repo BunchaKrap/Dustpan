@@ -177,4 +177,17 @@ public extension JunkScanReport {
 
 public extension Int64 {
     var formattedBytes: String { ByteCountFormatter.string(fromByteCount: self, countStyle: .file) }
+
+    /// Short form for tight spaces like sidebar pills: "623 GB", "4.2 GB", "980 MB".
+    var compactBytes: String {
+        let units = ["KB", "MB", "GB", "TB", "PB"]
+        var value = Double(Swift.max(self, 0)) / 1000
+        var unit = 0
+        while value >= 999.5 && unit < units.count - 1 {
+            value /= 1000
+            unit += 1
+        }
+        let digits = value < 9.95 && value != 0 ? 1 : 0
+        return value.formatted(.number.precision(.fractionLength(digits))) + " " + units[unit]
+    }
 }

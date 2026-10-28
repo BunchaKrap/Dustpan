@@ -19,6 +19,20 @@ struct SettingsView: View {
                 .segmentedContainer(palette)
             }
 
+            section("Background") {
+                Toggle(isOn: $settings.backgroundMotion) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Drifting ribbons").font(.system(size: 13))
+                        Text("Slow, soft strings that move behind the content. They hold still when Reduce Motion is on in System Settings.")
+                            .font(.system(size: 11.5))
+                            .foregroundStyle(palette.text2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .toggleStyle(.switch)
+                .controlSize(.small)
+            }
+
             section("Accent colour") {
                 HStack(spacing: 18) {
                     ForEach(AccentTheme.allCases, id: \.self) { accent in

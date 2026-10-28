@@ -138,35 +138,41 @@ struct BreadcrumbBar: View {
     @Environment(\.palette) private var palette
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 2) {
-                ForEach(Array(crumbs.enumerated()), id: \.element.id) { index, crumb in
-                    if index > 0 {
-                        GlyphView(.chevron, size: 8).foregroundStyle(palette.text3).padding(.horizontal, 2)
-                    }
-                    let isLast = index == crumbs.count - 1
-                    Button {
-                        onSelect(index)
-                    } label: {
-                        HStack(spacing: 5) {
-                            if index == 0 { GlyphView(.folder, size: 12).foregroundStyle(palette.accent) }
-                            Text(crumb.title)
-                                .font(.system(size: 13, weight: isLast ? .semibold : .regular))
-                                .lineLimit(1)
-                        }
-                        .foregroundStyle(isLast ? palette.text : palette.text2)
-                        .padding(.horizontal, 9)
-                        .frame(height: 28)
-                        .background(isLast ? palette.chip : .clear, in: RoundedRectangle(cornerRadius: 7))
-                        .hoverFill(palette.rowHover, cornerRadius: 7)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isLast)
+        // Sits next to the navigation buttons while it fits; scrolls (showing the deepest folder) once it doesn't.
+        ViewThatFits(in: .horizontal) {
+            trail.frame(maxWidth: .infinity, alignment: .leading)
+            ScrollView(.horizontal, showsIndicators: false) { trail }
+                .defaultScrollAnchor(.trailing)
+        }
+    }
+
+    private var trail: some View {
+        HStack(spacing: 2) {
+            ForEach(Array(crumbs.enumerated()), id: \.element.id) { index, crumb in
+                if index > 0 {
+                    GlyphView(.chevron, size: 8).foregroundStyle(palette.text3).padding(.horizontal, 2)
                 }
+                let isLast = index == crumbs.count - 1
+                Button {
+                    onSelect(index)
+                } label: {
+                    HStack(spacing: 5) {
+                        if index == 0 { GlyphView(.folder, size: 12).foregroundStyle(palette.accent) }
+                        Text(crumb.title)
+                            .font(.system(size: 13, weight: isLast ? .semibold : .regular))
+                            .lineLimit(1)
+                    }
+                    .foregroundStyle(isLast ? palette.text : palette.text2)
+                    .padding(.horizontal, 9)
+                    .frame(height: 28)
+                    .background(isLast ? palette.chip : .clear, in: RoundedRectangle(cornerRadius: 7))
+                    .hoverFill(palette.rowHover, cornerRadius: 7)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(isLast)
             }
         }
-        .defaultScrollAnchor(.trailing)
     }
 }
 

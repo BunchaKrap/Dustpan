@@ -47,6 +47,7 @@ enum SidebarSection: String, CaseIterable, Identifiable {
     case diskSpace = "Disk Space"
     case uninstaller = "Uninstaller"
     case history = "History"
+    case activity = "Activity"
 
     var id: Self { self }
 
@@ -57,6 +58,7 @@ enum SidebarSection: String, CaseIterable, Identifiable {
         case .duplicates: .navDuplicates
         case .uninstaller: .navUninstaller
         case .history: .navHistory
+        case .activity: .navActivity
         }
     }
 
@@ -67,17 +69,18 @@ enum SidebarSection: String, CaseIterable, Identifiable {
         case .diskSpace: Tint.blue
         case .uninstaller: Tint.purple
         case .history: Tint.grey
+        case .activity: Tint.pink
         }
     }
 
     /// Sidebar group headings, as in the v2 design.
     static let groups: [(title: String, sections: [SidebarSection])] = [
         ("Clean", [.cleanup, .duplicates]),
-        ("Inspect", [.diskSpace, .uninstaller]),
+        ("Inspect", [.diskSpace, .activity, .uninstaller]),
         ("History", [.history]),
     ]
 
-    /// ⌘1…⌘5 switch sections.
+    /// ⌘1…⌘6 switch sections, in the order they were added so existing shortcuts stay put.
     var shortcut: KeyEquivalent {
         KeyEquivalent(Character("\(Self.allCases.firstIndex(of: self)! + 1)"))
     }
@@ -95,6 +98,7 @@ struct RootView: View {
     @State private var duplicates = DuplicatesModel()
     @State private var uninstaller = UninstallerModel()
     @State private var history = HistoryModel()
+    @State private var activity = ActivityModel()
     @State private var startupDisk = MountedVolume.all().first(where: \.isStartup)
     @Environment(\.palette) private var palette
 
@@ -123,10 +127,21 @@ struct RootView: View {
                     UninstallerView(model: uninstaller)
                 case .history:
                     HistoryView(model: history)
+                case .activity:
+                    ActivityView(model: activity)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(palette.bg)
+            .background {
+                ZStack {
+                    palette.bg
+                    if settings.backgroundMotion {
+                        AmbientRibbons(colors: [palette.accent, Tint.purple, Tint.blue], intensity: palette.isDark ? 1.25 : 1)
+                            .transition(.opacity)
+                    }
+                }
+                .animation(.easeInOut(duration: 0.6), value: settings.backgroundMotion)
+            }
         }
         .foregroundStyle(palette.text)
         .font(.system(size: 13))
@@ -159,15 +174,16 @@ struct RootView: View {
         if cleanup.isScanning {
             pills[.cleanup] = "\(Int(cleanup.scanFraction * 100))%"
         } else if let report = cleanup.report {
-            pills[.cleanup] = report.reclaimableBytes.formattedBytes
+            pills[.cleanup] = report.reclaimableBytes.compactBytes
         }
-        if duplicates.report != nil { pills[.duplicates] = duplicates.wastedBytes.formattedBytes }
+        if duplicates.report != nil { pills[.duplicates] = duplicates.wastedBytes.compactBytes }
         if let root = diskSpace.root {
             let _ = diskSpace.revision
-            pills[.diskSpace] = root.sizeBytes.formattedBytes
+            pills[.diskSpace] = root.sizeBytes.compactBytes
         }
         if !uninstaller.apps.isEmpty { pills[.uninstaller] = "\(uninstaller.apps.count)" }
         if !history.sessions.isEmpty { pills[.history] = "\(history.sessions.count)" }
+        if activity.flaggedCount > 0 { pills[.activity] = "\(activity.flaggedCount)" }
         return pills
     }
 
@@ -183,6 +199,8 @@ struct RootView: View {
             if !duplicates.isBusy { duplicates.startOver() }
         case .uninstaller:
             uninstaller.reloadApps()
+        case .activity:
+            Task { await activity.refresh() }
         }
     }
 }
@@ -296,6 +314,8 @@ private struct Sidebar: View {
                         .font(.system(size: 11.5, weight: .semibold))
                         .monospacedDigit()
                         .foregroundStyle(isSelected ? Color.white : palette.text2)
+                        .lineLimit(1)
+                        .fixedSize()
                         .padding(.horizontal, 7)
                         .padding(.vertical, 1)
                         .background(isSelected ? palette.accent : palette.text.opacity(0.06), in: Capsule())

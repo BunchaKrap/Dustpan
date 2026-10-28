@@ -4,7 +4,7 @@ import SwiftUI
 /// Outline icons from the design file, drawn from their original SVG path data.
 public enum Glyph: String, CaseIterable, Sendable {
     // Sidebar & chrome
-    case navCleanup, navDisk, navUninstaller, appearance, settings, rescan, close, sliders, search, logDocument
+    case navCleanup, navDisk, navUninstaller, navActivity, appearance, settings, rescan, close, sliders, search, logDocument
     // States
     case emptyPan, okCircle, cleanSeal, warning, lock, check, chevron
     // Categories
@@ -17,6 +17,7 @@ public enum Glyph: String, CaseIterable, Sendable {
         switch self {
         case .navCleanup: "M6.4 2.2l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z M11.6 8.4l.7 1.7 1.7.7-1.7.7-.7 1.7-.7-1.7-1.7-.7 1.7-.7z"
         case .navDisk: "M8 2a6 6 0 100 12A6 6 0 008 2z M8 8V2 M8 8l5.2 3"
+        case .navActivity: "M1.6 8.4h2.8l1.8-4.6 3.3 8.6 1.9-4h3"
         case .navUninstaller: "M2.5 3.5h11v9a1 1 0 01-1 1h-9a1 1 0 01-1-1z M5 6h6l-.5 5.5h-5z M6.6 6V5h2.8v1"
         case .appearance: "M8 3a5 5 0 100 10A5 5 0 008 3z M8 3v10"
         case .settings, .gear:

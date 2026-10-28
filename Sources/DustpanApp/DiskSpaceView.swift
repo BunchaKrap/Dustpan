@@ -111,8 +111,8 @@ struct DiskSpaceView: View {
                 }
 
                 Text("macOS may ask for permission to read Desktop, Documents, Downloads or other apps' data. Grant Full Disk Access in System Settings to measure everything.")
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(palette.text3)
+                    .font(.system(size: 12))
+                    .foregroundStyle(palette.text2)
             }
             .padding(.horizontal, 28)
             .padding(.vertical, 24)
@@ -495,7 +495,7 @@ private struct DiskRow: View {
             Text(shareText)
                 .font(.system(size: 11.5))
                 .monospacedDigit()
-                .foregroundStyle(palette.text3)
+                .foregroundStyle(palette.text2)
                 .frame(width: 42, alignment: .trailing)
             GlyphView(.chevron, size: 10)
                 .foregroundStyle(palette.text2)

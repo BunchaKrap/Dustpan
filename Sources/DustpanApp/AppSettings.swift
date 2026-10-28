@@ -15,12 +15,17 @@ final class AppSettings {
     var appIcon: AppIconStyle {
         didSet { save(appIcon.rawValue, "appIcon"); applyIcon() }
     }
+    /// The slow ribbons behind the content. macOS's Reduce Motion holds them still either way.
+    var backgroundMotion: Bool {
+        didSet { UserDefaults.standard.set(backgroundMotion, forKey: "backgroundMotion") }
+    }
 
     init() {
         let defaults = UserDefaults.standard
         appearance = defaults.string(forKey: "appearance").flatMap(AppearanceMode.init) ?? .system
         accent = defaults.string(forKey: "accent").flatMap(AccentTheme.init) ?? .walnut
         appIcon = defaults.string(forKey: "appIcon").flatMap(AppIconStyle.init(rawValue:)) ?? .sweep
+        backgroundMotion = defaults.object(forKey: "backgroundMotion") as? Bool ?? true
     }
 
     func applyAll() {

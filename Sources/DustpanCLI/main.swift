@@ -295,6 +295,38 @@ func runSelfTest() async -> Int {
     check(logText.contains("TRASHED") && logText.contains(appA.path), "logs removed path")
     check(logText.contains("REFUSED"), "logs refused path")
 
+    print("Processes")
+    let own = ProcessList.snapshot().first { $0.pid == getpid() }
+    check(own?.path?.hasSuffix("dustpan-cli") == true && own?.memoryBytes ?? 0 > 0, "lists this process with its path and memory")
+    check(CodeTrust.signer(path: "/bin/ls") == .apple && CodeTrust.signer(pid: 1, path: "/sbin/launchd") == .apple, "recognises Apple's signature")
+    func fake(_ name: String, at path: String, parent: Int32 = 99) -> RunningProcess {
+        RunningProcess(pid: 4242, parentPID: parent, shortName: name, path: path, uid: getuid(), started: nil, cpuNanoseconds: nil, memoryBytes: nil)
+    }
+    let notarized = CodeSigner.developerID(organization: "Acme", teamID: "ABC", notarized: true)
+    check(ProcessAssessment.assess(fake("ls", at: "/bin/ls"), signer: .apple, launchItem: nil, home: "/Users/x").level == .trusted
+          && ProcessAssessment.assess(fake("acme", at: "/bin/cat"), signer: notarized, launchItem: nil, home: "/Users/x").level == .trusted,
+          "Apple and notarized programs have no warning signs")
+    check(ProcessAssessment.assess(fake("tool", at: "/usr/bin/true"), signer: .adHoc, launchItem: nil, home: "/Users/x").level == .unverified,
+          "self-installed tools are unverified, not flagged")
+    check(ProcessAssessment.assess(fake("update", at: "/private/tmp/x/update"), signer: .adHoc, launchItem: nil, home: "/Users/x").level == .suspicious
+          && ProcessAssessment.assess(fake("WindowServer", at: "/Users/x/Library/WindowServer"), signer: notarized, launchItem: nil, home: "/Users/x").level == .suspicious,
+          "unsigned in a temp folder, or a macOS name without Apple's signature, is suspicious")
+    check(ProcessAssessment.assess(fake("app", at: "/Applications/App.app/Contents/MacOS/app"), signer: .untrustedCertificate(name: "TNT"), launchItem: nil, home: "/Users/x").level == .caution,
+          "flags apps re-signed with a certificate Apple didn't issue")
+    let brew = LaunchItem(label: "homebrew.mxcl.redis", plist: URL(fileURLWithPath: "/x.plist"), program: "/opt/homebrew/bin/redis-server",
+                          scope: .userAgent, runsAtLoad: true, keepsAlive: true)
+    let agent = LaunchItem(label: "com.shady.agent", plist: URL(fileURLWithPath: "/y.plist"), program: "/bin/sh",
+                           scope: .userAgent, runsAtLoad: true, keepsAlive: true)
+    check(ProcessAssessment.assess(fake("redis-server", at: "/bin/echo", parent: 1), signer: .adHoc, launchItem: brew, home: "/Users/x").level == .unverified
+          && ProcessAssessment.assess(fake("agent", at: "/bin/sh", parent: 1), signer: .adHoc, launchItem: agent, home: "/Users/x").level == .caution,
+          "unverified auto-start items are flagged, Homebrew services aren't")
+    check(LaunchItems.item(for: fake("agent", at: "/bin/sh", parent: 1), in: [agent]) == agent
+          && LaunchItems.item(for: fake("agent", at: "/bin/sh", parent: 500), in: [agent]) == nil,
+          "links a launch item only to the process launchd started")
+    check(ProcessControl.protectionReason(for: fake("WindowServer", at: "/System/Library/WindowServer")) != nil
+          && ProcessControl.protectionReason(for: fake("x", at: "/x"), selfPID: 4242) != nil
+          && ProcessControl.protectionReason(for: fake("node", at: "/opt/homebrew/bin/node")) == nil, "won't stop critical processes or itself")
+
     print("Changelog")
     let changelogText = """
     # What's New
@@ -468,6 +500,25 @@ case "apps":
     }
 case "log":
     print(DeletionLog.default.fileURL.path)
+case "processes":
+    // Same checks as the Activity screen. --all lists every process, otherwise only ones with warning signs.
+    let started = Date()
+    let processes = ProcessList.snapshot()
+    let launchItems = LaunchItems.all()
+    let launchIndex = LaunchItemIndex(launchItems)
+    var levels: [TrustLevel: Int] = [:]
+    for process in processes.sorted(by: { $0.displayName.lowercased() < $1.displayName.lowercased() }) {
+        let item = launchIndex.item(for: process)
+        let assessment = ProcessAssessment.assess(process, signer: CodeTrust.signer(pid: process.pid, path: process.path), launchItem: item)
+        levels[assessment.level, default: 0] += 1
+        guard args.contains("--all") || assessment.level >= .caution else { continue }
+        print("\(pad(String(process.pid), 6)) \(pad(assessment.level.title, 20)) \(process.displayName)  [\(process.userName)]")
+        print("       \(process.path ?? "(path hidden)")")
+        print("       \(assessment.summary)")
+        for sign in assessment.signs { print("       ! \(sign.title): \(sign.detail)") }
+    }
+    print(String(format: "\n%d processes, %d launch items · %.2fs", processes.count, launchItems.count, Date().timeIntervalSince(started)))
+    for level in [TrustLevel.trusted, .unverified, .caution, .suspicious] { print("  \(pad(level.title, 22)) \(levels[level, default: 0])") }
 case "release-notes":
     // Used by release.sh: prints one version's notes from CHANGELOG.md, or fails so nothing ships without them.
     let file = args.count > 2 ? args[2] : "CHANGELOG.md"
@@ -493,5 +544,6 @@ default:
       selftest           run core checks in a temporary folder
       log                print the deletion log path
       release-notes <version> [file]  print a version's notes from CHANGELOG.md
+      processes [--all]  running processes with warning signs (--all: every process)
     """)
 }

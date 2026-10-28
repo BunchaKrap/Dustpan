@@ -6,10 +6,18 @@ Each release gets a "## <version> — <date>" heading and up to three groups: ##
 release.sh publishes the matching section as the GitHub release notes, and the app shows it after updating.
 -->
 
-## Unreleased
+## 0.2.3 — 29 October 2026
+
+### New
+- Activity: see everything running on your Mac, including background processes, with live CPU and memory use. Pick one to see what it is, who made it, whether it starts by itself, and any warning signs, then quit it if you want.
+- Dustpan points out programs worth a closer look, such as apps re-signed with a certificate Apple didn't issue (as cracked apps are), programs pretending to be part of macOS, or unverified programs that start automatically, and explains why each one matters.
+- Slow, soft ribbons drift behind the content. You can turn them off in Settings, and they hold still when Reduce Motion is on.
 
 ### Fixed
 - Scanning your whole startup disk no longer reports far more space than your Mac has. Dustpan was walking into a hidden macOS folder that mirrors the entire disk and counting everything twice.
+- Long sizes no longer wrap inside the sidebar badges, and the folder path in Disk Space sits next to the back and up buttons.
+- Buttons and footers no longer squeeze their text onto two lines in smaller windows.
+- Hints and secondary text are darker and easier to read, in both light and dark mode.
 
 ## 0.2.2 — 28 October 2026
 
