@@ -1,0 +1,52 @@
+# Publishes a release whenever CHANGELOG.md gains a version that hasn't been released yet,
+# so committing and pushing the changelog is all it takes for Check for Updates to find it.
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths: [CHANGELOG.md]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DUSTPAN_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find the newest version in CHANGELOG.md
+        id: version
+        run: |
+          # First "## 1.2.3" heading; a "## Unreleased" section is skipped until it gets a number.
+          version="$(sed -nE 's/^## v?([0-9]+(\.[0-9]+)+).*/\1/p' CHANGELOG.md | head -1)"
+          if [[ -z "$version" ]]; then
+            echo "No version heading in CHANGELOG.md; nothing to release."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          elif gh release view "v$version" --repo "$DUSTPAN_REPO" >/dev/null 2>&1; then
+            echo "v$version is already released; nothing to do."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Releasing v$version."
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Run the self-test
+        if: steps.version.outputs.publish == 'true'
+        run: |
+          swift build -c release --product dustpan-cli
+          "$(swift build -c release --show-bin-path)/dustpan-cli" selftest
+
+      - name: Build and publish
+        if: steps.version.outputs.publish == 'true'
+        run: ./release.sh "${{ steps.version.outputs.version }}"

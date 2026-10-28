@@ -20,5 +20,7 @@ rm -f "$ZIP"
 ditto -c -k --sequesterRsrc --keepParent build/Dustpan.app "$ZIP"
 
 # The in-app updater uses the .zip; the .pkg is for first-time installs.
-gh release create "v${VERSION}" "$ZIP" "$PKG" --repo "$REPO" --title "Dustpan ${VERSION}" --notes "$NOTES"
+# --target tags the commit that was built (it must already be pushed).
+gh release create "v${VERSION}" "$ZIP" "$PKG" --repo "$REPO" --target "$(git rev-parse HEAD)" \
+  --title "Dustpan ${VERSION}" --notes "$NOTES"
 echo "Published v${VERSION} to https://github.com/${REPO}/releases"

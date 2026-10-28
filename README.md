@@ -148,12 +148,10 @@ Dustpan updates itself from **GitHub Releases**. It never checks on its own: the
 
 Publishing a release (needs the GitHub CLI: `brew install gh && gh auth login`; the repo must be public):
 
-1. Add a `## 0.3.0 — <date>` section to [`CHANGELOG.md`](CHANGELOG.md) with `### New`, `### Improved` and `### Fixed` bullets, written for people using the app.
-2. Run:
+1. Add a `## 0.3.0 — <date>` section to the top of [`CHANGELOG.md`](CHANGELOG.md) with `### New`, `### Improved` and `### Fixed` bullets, written for people using the app. (Keep work in progress under `## Unreleased`; it isn't published until it gets a version number.)
+2. Commit and push to `main`.
 
-```bash
-./release.sh 0.3.0
-```
+That's it: the **Release** GitHub Action (`.github/workflows/release.yml`) sees a version in the changelog that has no release yet, runs the self-test, and runs `./release.sh 0.3.0` on a GitHub Mac. A few minutes later Check for Updates finds it. Pushes that don't add a new version do nothing. To release from your own Mac instead, run `./release.sh 0.3.0` after pushing.
 
 The changelog is the update log users see: `release.sh` publishes that section as the GitHub release notes (and refuses to release a version that has none), the Check for Updates sheet shows them before installing, and after Dustpan relaunches on the new version a **What's New** screen lists everything that changed since the version they had (Dustpan › What's New in Dustpan… shows it again any time).
 
