@@ -152,7 +152,7 @@ Publishing a release (needs the GitHub CLI: `brew install gh && gh auth login`; 
 ./release.sh 0.3.0 "What changed in this version"
 ```
 
-`release.sh` builds with that version, bakes the repo name into the app (from `gh repo view`, or `DUSTPAN_REPO=owner/name`), zips it and creates the `v0.3.0` release. Builds made with plain `./bundle.sh` have no repo set, and their update button says updates aren't set up.
+`release.sh` builds with that version, bakes the repo name into the app (from `gh repo view`, or `DUSTPAN_REPO=owner/name`), zips it, builds the installer `.pkg`, and creates the `v0.3.0` release with both attached. Builds made with plain `./bundle.sh` have no repo set, and their update button says updates aren't set up.
 
 ## Building and running
 
@@ -163,7 +163,10 @@ swift build                             # build everything
 swift run dustpan-cli selftest          # 44 core checks in a temp folder
 swift run dustpan-cli scan --verbose    # read-only scan in the terminal
 ./bundle.sh release --open              # build build/Dustpan.app and launch
+./pkg.sh 0.3.0                          # build build/Dustpan-0.3.0-macOS.pkg (installs to /Applications)
 ```
+
+The `.pkg` is unsigned unless `DUSTPAN_INSTALLER_IDENTITY` names a "Developer ID Installer" certificate, so after downloading, macOS blocks it the first time: right-click › Open, or System Settings › Privacy & Security › Open Anyway.
 
 `bundle.sh` compiles with SwiftPM, assembles the `.app` (Info.plist, resources), and ad-hoc signs it. The `xcrun … PlatformPath` warning during builds is harmless (no XCTest without full Xcode).
 
