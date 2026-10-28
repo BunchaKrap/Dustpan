@@ -6,6 +6,11 @@ Each release gets a "## <version> — <date>" heading and up to three groups: ##
 release.sh publishes the matching section as the GitHub release notes, and the app shows it after updating.
 -->
 
+## Unreleased
+
+### Fixed
+- Scanning your whole startup disk no longer reports far more space than your Mac has. Dustpan was walking into a hidden macOS folder that mirrors the entire disk and counting everything twice.
+
 ## 0.2.2 — 28 October 2026
 
 ### Fixed

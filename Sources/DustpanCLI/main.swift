@@ -137,6 +137,8 @@ func runSelfTest() async -> Int {
     let (fresh, _, denied) = await DiskUsageScanner().scan(tree)
     try! fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: locked.path)
     check(denied.isEmpty, "Unix permissions aren't reported as a privacy block")
+    check(DiskUsageScanner.plainPath(URL(string: "file:///.nofollow/")!) == "/.nofollow" && DiskUsageScanner.plainPath(URL(fileURLWithPath: "/")) == "/",
+          "skip list matches folders reported with a trailing slash")
     let areaHome = "/Users/x"
     check(ProtectedArea.of(areaHome + "/Library/Containers/com.a.b/Data", home: areaHome) == .otherAppsData
           && ProtectedArea.of(areaHome + "/Library/Group Containers", home: areaHome) == .otherAppsData

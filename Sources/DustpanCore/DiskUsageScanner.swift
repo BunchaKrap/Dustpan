@@ -166,11 +166,17 @@ public struct DiskUsageScanner: Sendable {
         }
         if values.isSymbolicLink == true { return .skip }
         if values.isDirectory == true {
-            return skippedPaths.contains(url.path) ? .skip : .directory
+            return skippedPaths.contains(Self.plainPath(url)) ? .skip : .directory
         }
         let bytes = Int64(values.totalFileAllocatedSize ?? values.fileAllocatedSize ?? 0)
         tally.addFile(bytes: bytes, path: url.path)
         return .file(DiskNode(url: url, name: url.lastPathComponent, isDirectory: false, sizeBytes: bytes, fileCount: 1))
+    }
+
+    /// Foundation reports some special folders with a trailing slash ("/.nofollow/"), which would slip past `skippedPaths`.
+    public static func plainPath(_ url: URL) -> String {
+        let path = url.path
+        return path.count > 1 && path.hasSuffix("/") ? String(path.dropLast()) : path
     }
 
     /// Registered with `FolderAccessWatch` because macOS may hold the open until a permission dialog is answered.
