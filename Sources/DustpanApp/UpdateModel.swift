@@ -17,6 +17,13 @@ final class UpdateModel {
 
     private(set) var phase = Phase.idle
     var isShowingSheet = false
+    /// What's New: releases since the version that ran before, newest first.
+    private(set) var whatsNew: [ChangelogEntry] = []
+    /// True when shown because Dustpan just updated, rather than from the menu.
+    private(set) var isAfterUpdate = false
+    /// The version the person updated from, when known.
+    private(set) var updatedFrom: String?
+    var isShowingWhatsNew = false
 
     let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
     private let updater = GitHubUpdater(
@@ -25,6 +32,12 @@ final class UpdateModel {
         bundleIdentifier: Bundle.main.bundleIdentifier ?? "com.local.dustpan"
     )
     private var task: Task<Void, Never>?
+    private static let lastVersionKey = "lastLaunchedVersion"
+    private static let updatedFromKey = "updatedFromVersion"
+
+    init() {
+        showWhatsNewIfUpdated()
+    }
 
     var isConfigured: Bool { updater.isConfigured }
     var releasesPage: URL? { updater.releasesPage }
@@ -77,6 +90,8 @@ final class UpdateModel {
         guard case .ready(_, let staged) = phase else { return }
         do {
             try GitHubUpdater.installAndRelaunch(staged: staged, replacing: Bundle.main.bundleURL)
+            // Read back by the new version on launch to show What's New.
+            UserDefaults.standard.set(currentVersion, forKey: Self.updatedFromKey)
             NSApp.terminate(nil)
         } catch {
             phase = .failed("Couldn't start the installer: \(error.localizedDescription)")
@@ -92,6 +107,46 @@ final class UpdateModel {
         if case .downloading = phase { return }
         if case .failed = phase { phase = .idle }
         if case .upToDate = phase { phase = .idle }
+    }
+
+    // MARK: What's New
+
+    /// Notes for every release in the app's bundled CHANGELOG.md; empty in `swift run` builds.
+    private var changelog: [ChangelogEntry] {
+        guard let url = Bundle.main.url(forResource: "CHANGELOG", withExtension: "md"),
+              let text = try? String(contentsOf: url, encoding: .utf8) else { return [] }
+        return Changelog.parse(text)
+    }
+
+    /// Dustpan > What's New in Dustpan…: the current release and the ones before it.
+    func showWhatsNew() {
+        whatsNew = Changelog.entries(changelog, after: "0", through: currentVersion)
+        isAfterUpdate = false
+        updatedFrom = nil
+        isShowingWhatsNew = !whatsNew.isEmpty
+    }
+
+    func dismissWhatsNew() {
+        isShowingWhatsNew = false
+    }
+
+    /// Runs once per launch, before anything else writes to UserDefaults.
+    private func showWhatsNewIfUpdated() {
+        let defaults = UserDefaults.standard
+        let previous = defaults.string(forKey: Self.updatedFromKey) ?? defaults.string(forKey: Self.lastVersionKey)
+        // 0.2.1 didn't record its version, so an existing preferences file is the sign it was used before.
+        let usedBefore = previous != nil || !(defaults.persistentDomain(forName: Bundle.main.bundleIdentifier ?? "") ?? [:]).isEmpty
+        defaults.removeObject(forKey: Self.updatedFromKey)
+        defaults.set(currentVersion, forKey: Self.lastVersionKey)
+        guard usedBefore, previous.map({ GitHubUpdater.isNewer(currentVersion, than: $0) }) ?? true else { return }
+
+        let entries = changelog
+        // Without a known previous version, show just this release rather than the whole history.
+        whatsNew = previous.map { Changelog.entries(entries, after: $0, through: currentVersion) }
+            ?? entries.filter { $0.version == GitHubUpdater.normalized(currentVersion) }
+        isAfterUpdate = true
+        updatedFrom = previous
+        isShowingWhatsNew = !whatsNew.isEmpty
     }
 
     private var isBusy: Bool {

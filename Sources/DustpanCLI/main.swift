@@ -131,7 +131,23 @@ func runSelfTest() async -> Int {
     big.remove(inner)
     check(diskRoot.sizeBytes == before - inner.sizeBytes && diskRoot.fileCount == 5, "remove updates totals up the tree")
     check(inner.ancestry.count == 3, "ancestry walks to root")
-    let (fresh, _) = await DiskUsageScanner().scan(tree)
+    let locked = tree.appendingPathComponent("locked")
+    try! fm.createDirectory(at: locked, withIntermediateDirectories: true)
+    try! fm.setAttributes([.posixPermissions: 0o000], ofItemAtPath: locked.path)
+    let (fresh, _, denied) = await DiskUsageScanner().scan(tree)
+    try! fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: locked.path)
+    check(denied.isEmpty, "Unix permissions aren't reported as a privacy block")
+    let areaHome = "/Users/x"
+    check(ProtectedArea.of(areaHome + "/Library/Containers/com.a.b/Data", home: areaHome) == .otherAppsData
+          && ProtectedArea.of(areaHome + "/Library/Group Containers", home: areaHome) == .otherAppsData
+          && ProtectedArea.of(areaHome + "/Desktop/a", home: areaHome) == .desktop
+          && ProtectedArea.of(areaHome + "/DesktopStuff", home: areaHome) == .system
+          && ProtectedArea.of("/Volumes/USB/x", home: areaHome) == .otherDisk, "classifies protected folders")
+    let watch = FolderAccessWatch()
+    let token = watch.begin("/slow")
+    check(watch.stalled(longerThan: 60) == nil && watch.stalled(longerThan: -1)?.path == "/slow", "access watch reports the oldest open")
+    watch.end(token)
+    check(watch.stalled(longerThan: -1) == nil, "access watch forgets finished opens")
     let largest = fresh.largestFiles(limit: 2)
     check(largest.map(\.name) == ["huge.bin", "small4.txt"], "largestFiles walks the whole tree, biggest first")
     check(fresh.largestFiles(limit: 5) { FileKind.of($0.url) == .other }.first?.name == "huge.bin", "largestFiles honours a filter")
@@ -277,6 +293,34 @@ func runSelfTest() async -> Int {
     check(logText.contains("TRASHED") && logText.contains(appA.path), "logs removed path")
     check(logText.contains("REFUSED"), "logs refused path")
 
+    print("Changelog")
+    let changelogText = """
+    # What's New
+    <!-- notes for writers -->
+    ## 0.3.0 — 1 November 2026
+    ### Fixed
+    - Scans no longer hang,
+      even in Library.
+    ### New
+    - A thing
+    ## v0.2.1
+    Plain release notes.
+    - One bullet
+    ## 0.2.0 — 1 October 2026
+    ### New
+    - First
+    """
+    let changelog = Changelog.parse(changelogText)
+    check(changelog.map(\.version) == ["0.3.0", "0.2.1", "0.2.0"] && changelog[0].date == "1 November 2026" && changelog[1].date == nil,
+          "reads versions and dates")
+    check(changelog[0].sections == [ChangelogSection(title: "Fixed", items: ["Scans no longer hang, even in Library."]),
+                                    ChangelogSection(title: "New", items: ["A thing"])], "groups items and joins wrapped bullets")
+    check(changelog[1].sections == [ChangelogSection(title: "", items: ["Plain release notes.", "One bullet"])], "keeps notes without headings")
+    check(Changelog.entries(changelog, after: "0.2.0", through: "0.3.0").map(\.version) == ["0.3.0", "0.2.1"],
+          "shows every release since the one you had, newest first")
+    check(Changelog.notes(for: "v0.3.0", in: changelogText) == "### Fixed\n- Scans no longer hang,\n  even in Library.\n### New\n- A thing"
+          && Changelog.notes(for: "9.9.9", in: changelogText) == nil, "extracts one release's notes for publishing")
+
     print("Updater")
     check(GitHubUpdater.isNewer("v0.10.0", than: "0.9.2") && !GitHubUpdater.isNewer("1.0", than: "1.0.0")
           && !GitHubUpdater.isNewer("0.2.0", than: "0.3.0"), "compares versions numerically")
@@ -369,8 +413,11 @@ case "disk":
     let target = URL(fileURLWithPath: ((args.count > 1 ? args[1] : "~") as NSString).expandingTildeInPath)
     print("Measuring \(target.path)…")
     let started = Date()
-    let (tree, unreadable) = await DiskUsageScanner().scan(target)
+    let (tree, unreadable, denied) = await DiskUsageScanner().scan(target)
     print(String(format: "%@ in %d files · %.1fs · %d unreadable\n", tree.sizeBytes.formattedBytes, tree.fileCount, Date().timeIntervalSince(started), unreadable))
+    for (area, folders) in Dictionary(grouping: denied, by: { ProtectedArea.of($0) }).sorted(by: { $0.value.count > $1.value.count }) {
+        print("  macOS refused \(folders.count) folder(s) in \(area.name): grant \(area.settingsName) to include them")
+    }
     for child in tree.children.prefix(20) {
         print("  \(pad(child.sizeBytes.formattedBytes, 10)) \(child.isDirectory ? "📁" : "  ") \(child.name)")
     }
@@ -419,6 +466,15 @@ case "apps":
     }
 case "log":
     print(DeletionLog.default.fileURL.path)
+case "release-notes":
+    // Used by release.sh: prints one version's notes from CHANGELOG.md, or fails so nothing ships without them.
+    let file = args.count > 2 ? args[2] : "CHANGELOG.md"
+    guard args.count > 1, let text = try? String(contentsOfFile: file, encoding: .utf8),
+          let notes = Changelog.notes(for: args[1], in: text) else {
+        FileHandle.standardError.write("No notes for that version in CHANGELOG.md. Add a \"## <version> — <date>\" section first.\n".data(using: .utf8)!)
+        exit(1)
+    }
+    print(notes)
 default:
     print("""
     usage: dustpan-cli <command>
@@ -434,5 +490,6 @@ default:
       apps [name]        list apps, or show an app's leftover files
       selftest           run core checks in a temporary folder
       log                print the deletion log path
+      release-notes <version> [file]  print a version's notes from CHANGELOG.md
     """)
 }

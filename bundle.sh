@@ -29,6 +29,8 @@ ICONSET="build/AppIcon.iconset"
 rm -rf "$ICONSET"
 "$BIN_DIR/dustpan-cli" export-iconset "$ICON_STYLE" "$ICONSET" >/dev/null
 iconutil -c icns -o "$APP/Contents/Resources/AppIcon.icns" "$ICONSET"
+# Shown in the app's What's New screen after an update.
+cp CHANGELOG.md "$APP/Contents/Resources/CHANGELOG.md"
 
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>

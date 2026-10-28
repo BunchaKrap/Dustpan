@@ -6,6 +6,13 @@ enum DiskViewMode: String, CaseIterable {
     case list, map, largest
 }
 
+/// A folder macOS has been holding open for a while, usually behind a permission dialog.
+struct AccessStall: Equatable {
+    let path: String
+    let area: ProtectedArea
+    let seconds: Int
+}
+
 @MainActor
 @Observable
 final class DiskSpaceModel {
@@ -18,6 +25,11 @@ final class DiskSpaceModel {
     private(set) var bytesSeen: Int64 = 0
     private(set) var currentPath = ""
     private(set) var unreadable = 0
+    /// Set while the scan is stuck waiting on macOS to open a folder.
+    private(set) var stall: AccessStall?
+    /// Areas macOS refused during the last scan, most folders first.
+    private(set) var deniedAreas: [(area: ProtectedArea, folders: Int)] = []
+    var showsDeniedNotice = false
     private(set) var duration: TimeInterval = 0
     private(set) var volume = VolumeSpace.forVolume(containing: FileManager.default.homeDirectoryForCurrentUser)
     private(set) var deletionProgress: DeletionProgress?
@@ -36,6 +48,7 @@ final class DiskSpaceModel {
     private var backStack: [DiskNode] = []
     private var largestCache: (key: String, files: [DiskNode])?
     private var scanTask: Task<Void, Never>?
+    private var stallWatch: Task<Void, Never>?
     private let home = FileManager.default.homeDirectoryForCurrentUser
     private static let recentsKey = "diskSpaceRecents"
 
@@ -65,6 +78,9 @@ final class DiskSpaceModel {
         isScanning = true
         filesSeen = 0
         bytesSeen = 0
+        stall = nil
+        deniedAreas = []
+        showsDeniedNotice = false
         currentPath = display(target.path)
         volume = VolumeSpace.forVolume(containing: target)
         remember(target)
@@ -83,17 +99,46 @@ final class DiskSpaceModel {
             root = result.root
             current = result.root
             unreadable = result.unreadable
+            deniedAreas = Dictionary(grouping: result.denied) { ProtectedArea.of($0) }
+                .map { ($0.key, $0.value.count) }
+                .sorted { $0.folders > $1.folders }
+            showsDeniedNotice = !deniedAreas.isEmpty
             duration = Date().timeIntervalSince(started)
-            isScanning = false
+            finishScanning()
         }
+        watchForStalls()
     }
 
     func cancelScan() {
         scanTask?.cancel()
         scanTask = nil
-        isScanning = false
+        finishScanning()
         if root == nil { isShowingLauncher = true }
     }
+
+    private func finishScanning() {
+        isScanning = false
+        stallWatch?.cancel()
+        stallWatch = nil
+        stall = nil
+    }
+
+    /// The scanner can't time out a folder open that macOS is holding, so watch from here and explain the wait.
+    private func watchForStalls() {
+        stallWatch?.cancel()
+        stallWatch = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard let self, self.isScanning else { return }
+                let stalled = FolderAccessWatch.shared.stalled(longerThan: 3)
+                let next = stalled.map { AccessStall(path: self.display($0.path), area: .of($0.path), seconds: Int($0.seconds)) }
+                if next != self.stall {
+                    withAnimation(.easeInOut(duration: 0.25)) { self.stall = next }
+                }
+            }
+        }
+    }
+
 
     func chooseFolder() {
         if let url = ScanPlaces.chooseFolder(startingAt: rootURL, message: "Choose a folder to measure") {

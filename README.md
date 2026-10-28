@@ -148,9 +148,14 @@ Dustpan updates itself from **GitHub Releases**. It never checks on its own: the
 
 Publishing a release (needs the GitHub CLI: `brew install gh && gh auth login`; the repo must be public):
 
+1. Add a `## 0.3.0 — <date>` section to [`CHANGELOG.md`](CHANGELOG.md) with `### New`, `### Improved` and `### Fixed` bullets, written for people using the app.
+2. Run:
+
 ```bash
-./release.sh 0.3.0 "What changed in this version"
+./release.sh 0.3.0
 ```
+
+The changelog is the update log users see: `release.sh` publishes that section as the GitHub release notes (and refuses to release a version that has none), the Check for Updates sheet shows them before installing, and after Dustpan relaunches on the new version a **What's New** screen lists everything that changed since the version they had (Dustpan › What's New in Dustpan… shows it again any time).
 
 `release.sh` builds with that version, bakes the repo name into the app (from `gh repo view`, or `DUSTPAN_REPO=owner/name`), zips it, builds the installer `.pkg`, and creates the `v0.3.0` release with both attached. Builds made with plain `./bundle.sh` have no repo set, and their update button says updates aren't set up.
 

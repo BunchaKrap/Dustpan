@@ -260,6 +260,62 @@ struct OutcomeBanner: View {
     }
 }
 
+/// Explains a macOS privacy block in plain words and links to the System Settings pane that lifts it.
+struct AccessNotice: View {
+    let title: String
+    let lines: [String]
+    let areas: [ProtectedArea]
+    var onDismiss: (() -> Void)?
+    @Environment(\.palette) private var palette
+
+    /// One button per settings pane, however many areas share it.
+    private var panes: [ProtectedArea] {
+        var seen = Set<String>()
+        return areas.filter { seen.insert($0.settingsName).inserted }
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            GlyphView(.lock, size: 16)
+                .foregroundStyle(Palette.warnInk)
+                .padding(.top, 1)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title).font(.system(size: 13, weight: .semibold))
+                ForEach(lines, id: \.self) { line in
+                    Text(line)
+                        .font(.system(size: 12))
+                        .lineSpacing(1.5)
+                        .foregroundStyle(palette.text2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack(spacing: 8) {
+                    ForEach(panes, id: \.self) { area in
+                        Button("Open \(area.settingsName) Settings") { NSWorkspace.shared.open(area.settingsURL) }
+                            .buttonStyle(DPButtonStyle(.secondary, height: 28, horizontalPadding: 11, fontSize: 12.5))
+                    }
+                }
+                .padding(.top, 6)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if let onDismiss {
+                Button(action: onDismiss) {
+                    GlyphView(.close, size: 10)
+                        .frame(width: 18, height: 18)
+                        .hoverFill(.black.opacity(0.06), cornerRadius: 5)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(palette.text2)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 11)
+        .background(palette.warnBg, in: RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(palette.warnBorder, lineWidth: 0.5))
+        .transition(.opacity)
+    }
+}
+
 extension JunkCategory {
     var glyph: Glyph {
         switch self {

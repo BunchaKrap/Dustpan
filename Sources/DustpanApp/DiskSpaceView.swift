@@ -156,8 +156,39 @@ struct DiskSpaceView: View {
             NavButton(title: "Stop", glyph: .close) { model.cancelScan() }
                 .keyboardShortcut(.cancelAction)
                 .padding(.top, 4)
+            if let stall = model.stall {
+                stallNotice(stall)
+                    .frame(maxWidth: 520)
+                    .padding(.top, 10)
+            }
         }
+        .padding(.horizontal, 28)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func stallNotice(_ stall: AccessStall) -> some View {
+        let asksPermission = stall.area != .system
+        return AccessNotice(
+            title: asksPermission ? "Waiting for your permission in macOS" : "Waiting for macOS to open a folder",
+            lines: [
+                "Dustpan has been waiting \(stall.seconds) s to open \(stall.path). \(stall.area.explanation)",
+                "Look for a macOS dialog and click Allow, or Don't Allow to skip these folders. The scan carries on as soon as you answer.",
+                "No dialog? It may be hidden behind another window, or the disk isn't responding. Stop the scan, turn on \(stall.area.settingsName) for Dustpan in System Settings, then scan again.",
+            ],
+            areas: [stall.area]
+        )
+    }
+
+    private var deniedNotice: some View {
+        let total = model.deniedAreas.reduce(0) { $0 + $1.folders }
+        return AccessNotice(
+            title: "macOS kept Dustpan out of \(total.formatted()) \(total == 1 ? "folder" : "folders"), so they aren't counted",
+            lines: model.deniedAreas.map { "\($0.area.name): \($0.folders.formatted()) \($0.folders == 1 ? "folder" : "folders"). \($0.area.explanation)" }
+                + ["Allow Dustpan in System Settings, then Rescan to include them."],
+            areas: model.deniedAreas.map(\.area)
+        ) {
+            withAnimation(.easeInOut(duration: 0.2)) { model.showsDeniedNotice = false }
+        }
     }
 
     // MARK: Browser
@@ -168,6 +199,11 @@ struct DiskSpaceView: View {
         return VStack(spacing: 0) {
             if let outcome = model.lastOutcome {
                 OutcomeBanner(outcome: outcome) { model.lastOutcome = nil }
+                    .padding(.horizontal, 18)
+                    .padding(.top, 14)
+            }
+            if model.showsDeniedNotice {
+                deniedNotice
                     .padding(.horizontal, 18)
                     .padding(.top, 14)
             }

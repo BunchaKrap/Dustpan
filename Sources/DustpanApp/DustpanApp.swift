@@ -28,6 +28,7 @@ struct DustpanApp: App {
         .commands {
             CommandGroup(after: .appInfo) {
                 Button("Check for Updates…") { updates.checkNow() }
+                Button("What's New in Dustpan…") { updates.showWhatsNew() }
             }
         }
 
@@ -132,9 +133,14 @@ struct RootView: View {
         .ignoresSafeArea()
         .focusEffectDisabled()
         .overlay {
-            if updates.isShowingSheet { UpdateSheet(model: updates) }
+            if updates.isShowingSheet {
+                UpdateSheet(model: updates)
+            } else if updates.isShowingWhatsNew {
+                WhatsNewSheet(model: updates)
+            }
         }
         .animation(Motion.hover, value: updates.isShowingSheet)
+        .animation(Motion.hover, value: updates.isShowingWhatsNew)
         .onAppear {
             history.load()
             if let folder = UserDefaults.standard.string(forKey: "DustpanScanFolder") {

@@ -94,11 +94,12 @@ public struct DiskUsageScanner: Sendable {
         .isDirectoryKey, .isSymbolicLinkKey, .totalFileAllocatedSizeKey, .fileAllocatedSizeKey,
     ]
 
-    public func scan(_ root: URL, onProgress: (@Sendable (DiskScanProgress) -> Void)? = nil) async -> (root: DiskNode, unreadable: Int) {
+    /// `denied` lists the folders macOS privacy protections refused to open (at most `Tally.deniedLimit`).
+    public func scan(_ root: URL, onProgress: (@Sendable (DiskScanProgress) -> Void)? = nil) async -> (root: DiskNode, unreadable: Int, denied: [String]) {
         let tally = Tally(onProgress: onProgress)
         let rootNode = DiskNode(url: root, name: root.lastPathComponent.isEmpty ? root.path : root.lastPathComponent, isDirectory: true)
 
-        guard let contents = listing(of: root, tally: tally) else { return (rootNode, tally.unreadableCount) }
+        guard let contents = listing(of: root, tally: tally) else { return (rootNode, tally.unreadableCount, tally.deniedFolders) }
         var files: [DiskNode] = []
         var directories: [URL] = []
         for child in contents {
@@ -111,7 +112,7 @@ public struct DiskUsageScanner: Sendable {
 
         let subfolders = await buildInParallel(directories, depth: 1, tally: tally)
         assemble(rootNode, directories: subfolders, files: files)
-        return (rootNode, tally.unreadableCount)
+        return (rootNode, tally.unreadableCount, tally.deniedFolders)
     }
 
     /// The top few levels fan out across cores (big trees like ~/Library are wide); deeper levels walk sequentially.
@@ -172,11 +173,14 @@ public struct DiskUsageScanner: Sendable {
         return .file(DiskNode(url: url, name: url.lastPathComponent, isDirectory: false, sizeBytes: bytes, fileCount: 1))
     }
 
+    /// Registered with `FolderAccessWatch` because macOS may hold the open until a permission dialog is answered.
     private func listing(of url: URL, tally: Tally) -> [URL]? {
+        let token = FolderAccessWatch.shared.begin(url.path)
+        defer { FolderAccessWatch.shared.end(token) }
         do {
             return try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: Self.keys, options: [])
         } catch {
-            tally.addUnreadable()
+            tally.addUnreadable(deniedFolder: error.isPrivacyDenied ? url.path : nil)
             return nil
         }
     }
@@ -220,7 +224,9 @@ public struct DiskUsageScanner: Sendable {
         private var files = 0
         private var bytes: Int64 = 0
         private var unreadable = 0
+        private var denied: [String] = []
         private var lastReported = 0
+        static let deniedLimit = 500
 
         init(onProgress: (@Sendable (DiskScanProgress) -> Void)?) {
             self.onProgress = onProgress
@@ -231,8 +237,16 @@ public struct DiskUsageScanner: Sendable {
             return unreadable
         }
 
-        func addUnreadable() {
-            lock.lock(); unreadable += 1; lock.unlock()
+        var deniedFolders: [String] {
+            lock.lock(); defer { lock.unlock() }
+            return denied
+        }
+
+        func addUnreadable(deniedFolder: String? = nil) {
+            lock.lock()
+            unreadable += 1
+            if let deniedFolder, denied.count < Self.deniedLimit { denied.append(deniedFolder) }
+            lock.unlock()
         }
 
         func addFile(bytes fileBytes: Int64, path: String) {
