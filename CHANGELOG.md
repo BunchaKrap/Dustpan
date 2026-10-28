@@ -14,6 +14,7 @@ release.sh publishes the matching section as the GitHub release notes, and the a
 
 ### Improved
 - **A tidier What's New screen.** Each change has a short headline, and the window is always the same size.
+- **Cleaner dialogs.** The dimmed background behind dialogs now covers the whole window instead of stopping partway through the toolbar.
 
 ## 0.2.3 — 29 October 2026
 

@@ -35,6 +35,8 @@ struct ModalBackdrop<Content: View>: View {
                 .onTapGesture {} // swallow clicks behind the card
             content
         }
+        // The window draws under its title bar, so the dimming must too; otherwise its edge cuts through the toolbar.
+        .ignoresSafeArea()
         .transition(.opacity)
     }
 }
