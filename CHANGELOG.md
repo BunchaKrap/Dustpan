@@ -9,42 +9,44 @@ release.sh publishes the matching section as the GitHub release notes, and the a
 ## Unreleased
 
 ### Fixed
-- Updates install reliably. If you'd first installed Dustpan with the installer package, a leftover backup could stop later updates from replacing the app, and Dustpan quietly reopened the old version.
-- If an update ever can't be installed, Dustpan now says so when it reopens, explains why, and offers to try again.
+- **Updates install reliably.** If you first installed Dustpan with the installer package, a leftover backup could stop later updates from replacing the app, and Dustpan quietly reopened the old version.
+- **Clear message if an update fails.** Dustpan now says so when it reopens, explains why, and offers to try again.
+
+### Improved
+- **A tidier What's New screen.** Each change has a short headline, and the window is always the same size.
 
 ## 0.2.3 — 29 October 2026
 
 ### New
-- Activity: see everything running on your Mac, including background processes, with live CPU and memory use. Pick one to see what it is, who made it, whether it starts by itself, and any warning signs, then quit it if you want.
-- Dustpan points out programs worth a closer look, such as apps re-signed with a certificate Apple didn't issue (as cracked apps are), programs pretending to be part of macOS, or unverified programs that start automatically, and explains why each one matters.
-- Slow, soft ribbons drift behind the content. You can turn them off in Settings, and they hold still when Reduce Motion is on.
+- **Activity.** See everything running on your Mac, including background processes, with live CPU and memory use. Pick one to see what it is, who made it and whether it starts by itself, then quit it if you want.
+- **Warning signs for suspicious programs.** Dustpan points out apps re-signed with a certificate Apple didn't issue (as cracked apps are), programs pretending to be part of macOS, and unverified programs that start automatically, and explains why each one matters.
+- **Drifting ribbons.** Slow, soft strings move behind the content. Turn them off in Settings; they hold still when Reduce Motion is on.
 
 ### Fixed
-- Scanning your whole startup disk no longer reports far more space than your Mac has. Dustpan was walking into a hidden macOS folder that mirrors the entire disk and counting everything twice.
-- Long sizes no longer wrap inside the sidebar badges, and the folder path in Disk Space sits next to the back and up buttons.
-- Buttons and footers no longer squeeze their text onto two lines in smaller windows.
-- Hints and secondary text are darker and easier to read, in both light and dark mode.
+- **Full-disk scans add up again.** Scanning your startup disk no longer reports far more space than your Mac has. Dustpan was counting a hidden macOS folder that mirrors the whole disk.
+- **No more cramped text.** Sizes in the sidebar, buttons and footers no longer wrap onto two lines, and the folder path in Disk Space sits next to the back and up buttons.
+- **Easier to read.** Hints and secondary text are darker, in both light and dark mode.
 
 ## 0.2.2 — 28 October 2026
 
 ### Fixed
-- Disk Space no longer gets stuck on an endless spinner when scanning your Library or Home folder. macOS was quietly waiting for you to allow access to other apps' data, and the scan sat there until you answered.
+- **Disk Space no longer gets stuck.** Scanning your Library or Home folder could spin forever while macOS quietly waited for you to allow access to other apps' data.
 
 ### Improved
-- If a scan is waiting on a macOS permission, Dustpan now tells you right away: which folder, why, and what to click. There's a button that opens the right page in System Settings.
-- After a scan, Dustpan lists the folders macOS kept it out of, so you know which sizes are missing and how to include them.
-- After an update, Dustpan shows you what changed (you're reading it).
+- **Permission prompts explained.** If a scan is waiting on macOS, Dustpan tells you which folder, why, and what to click, with a button to the right page in System Settings.
+- **Skipped folders listed.** After a scan, Dustpan shows the folders macOS kept it out of, so you know which sizes are missing.
+- **What's New.** After an update, Dustpan shows you what changed (you're reading it).
 
 ### New
-- An installer package (.pkg) is now available on the releases page for first-time installs.
+- **Installer package.** A .pkg is available on the releases page for first-time installs.
 
 ## 0.2.1 — 22 October 2026
 
 ### New
-- Disk Space: measure any disk or folder in one click, then browse it as a list, a map, or a list of the largest files.
-- Duplicates: find identical files and keep just one copy.
-- History: see everything you've cleaned, and put things back from the Trash.
-- Check for Updates: get new versions of Dustpan straight from the app.
+- **Disk Space.** Measure any disk or folder in one click, then browse it as a list, a map, or the largest files.
+- **Duplicates.** Find identical files and keep just one copy.
+- **History.** See everything you've cleaned, and put things back from the Trash.
+- **Check for Updates.** Get new versions of Dustpan straight from the app.
 
 ### Improved
-- A fresh new design with smoother animations.
+- **A fresh design** with smoother animations.

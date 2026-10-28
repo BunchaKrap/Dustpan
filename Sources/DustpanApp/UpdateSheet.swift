@@ -29,9 +29,9 @@ struct UpdateSheet: View {
                     ScrollView {
                         ReleaseNotesList(sections: Changelog.sections(release.notes))
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(14)
+                            .padding(16)
                     }
-                    .frame(maxHeight: 220)
+                    .frame(height: 240)
                     .background(palette.field, in: RoundedRectangle(cornerRadius: 10))
                     .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(palette.hair, lineWidth: 0.5))
                     .padding(.horizontal, 24)
@@ -204,66 +204,92 @@ struct UpdateButton: View {
 }
 
 /// Shown after Dustpan relaunches on a new version (and from Dustpan › What's New in Dustpan…).
+/// Always the same size, whatever the window or the amount of notes; the notes scroll inside it.
 @MainActor
 struct WhatsNewSheet: View {
     let model: UpdateModel
     @Environment(\.palette) private var palette
 
     private var subtitle: String {
-        guard model.isAfterUpdate else { return "Recent changes to Dustpan." }
-        if let from = model.updatedFrom { return "You've updated from \(from). Here's what changed." }
-        return "Dustpan has been updated. Here's what changed."
+        guard model.isAfterUpdate else { return "The latest changes" }
+        if let from = model.updatedFrom { return "Updated from \(from)" }
+        return "Just updated"
     }
 
     var body: some View {
         ModalBackdrop {
             VStack(spacing: 0) {
-                VStack(spacing: 6) {
-                    TintTile(.navCleanup, tint: Tint.purple, size: 64, glyphSize: 30, radius: 17)
-                        .padding(.bottom, 10)
-                    Text("What's new in Dustpan \(model.currentVersion)").font(.system(size: 19, weight: .bold)).tracking(-0.3)
-                    Text(subtitle)
-                        .font(.system(size: 13))
-                        .foregroundStyle(palette.text2)
-                        .multilineTextAlignment(.center)
+                HStack(spacing: 14) {
+                    Image(nsImage: NSApp.applicationIconImage)
+                        .resizable()
+                        .interpolation(.high)
+                        .frame(width: 52, height: 52)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("What's new in Dustpan").font(.system(size: 19, weight: .bold)).tracking(-0.3)
+                        HStack(spacing: 8) {
+                            Text(model.currentVersion)
+                                .font(.system(size: 11.5, weight: .semibold))
+                                .monospacedDigit()
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 2)
+                                .background(palette.accent, in: Capsule())
+                            Text(subtitle).font(.system(size: 12.5)).foregroundStyle(palette.text2)
+                        }
+                    }
+                    Spacer(minLength: 0)
                 }
-                .padding(.horizontal, 28)
-                .padding(.top, 26)
+                .padding(.horizontal, 26)
+                .padding(.top, 24)
+                .padding(.bottom, 18)
+
+                Rectangle().fill(palette.hair).frame(height: 0.5)
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 22) {
+                    VStack(alignment: .leading, spacing: 28) {
                         ForEach(model.whatsNew, id: \.version) { entry in
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 16) {
                                 if model.whatsNew.count > 1 {
                                     Text(["Version \(entry.version)", entry.date].compactMap { $0 }.joined(separator: " · "))
-                                        .font(.system(size: 12, weight: .semibold))
-                                        .foregroundStyle(palette.text2)
+                                        .font(.system(size: 13, weight: .semibold))
+                                        .foregroundStyle(palette.text)
                                 }
                                 ReleaseNotesList(sections: entry.sections)
                             }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(16)
+                    .padding(.horizontal, 26)
+                    .padding(.top, 20)
+                    .padding(.bottom, 32)
                 }
-                .frame(maxHeight: 340)
-                .fixedSize(horizontal: false, vertical: true)
-                .background(palette.field, in: RoundedRectangle(cornerRadius: 10))
-                .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(palette.hair, lineWidth: 0.5))
-                .padding(.horizontal, 24)
-                .padding(.top, 18)
+                .frame(maxHeight: .infinity)
+                // Fades out at the bottom so it's clear the list carries on.
+                .mask {
+                    VStack(spacing: 0) {
+                        Color.black
+                        LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom).frame(height: 36)
+                    }
+                }
+
+                Rectangle().fill(palette.hair).frame(height: 0.5)
 
                 HStack {
+                    if model.releasesPage != nil {
+                        Button("All releases on GitHub") { model.openReleasePage() }
+                            .buttonStyle(.plain)
+                            .font(.system(size: 12.5))
+                            .foregroundStyle(palette.accent)
+                    }
                     Spacer()
                     Button("Continue") { model.dismissWhatsNew() }
                         .buttonStyle(DPButtonStyle(.primary, height: 32, horizontalPadding: 18, fontSize: 13))
                         .keyboardShortcut(.defaultAction)
                 }
                 .padding(.horizontal, 24)
-                .padding(.top, 20)
-                .padding(.bottom, 22)
+                .frame(height: 64)
             }
-            .frame(width: 500)
+            .frame(width: 540, height: 500)
             .background(palette.sheet, in: RoundedRectangle(cornerRadius: 14))
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(.black.opacity(0.2), lineWidth: 0.5))
             .shadow(color: .black.opacity(0.35), radius: 25, y: 20)
@@ -271,34 +297,45 @@ struct WhatsNewSheet: View {
     }
 }
 
-/// Release notes as labelled groups ("New", "Improved", "Fixed") of readable bullets.
+/// Release notes grouped under "New", "Improved" and "Fixed". An item written as `**Headline.** detail`
+/// shows the headline in bold with the detail beneath it.
 struct ReleaseNotesList: View {
     let sections: [ChangelogSection]
     @Environment(\.palette) private var palette
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 22) {
             ForEach(Array(sections.enumerated()), id: \.offset) { _, section in
-                let tint = Self.tint(for: section.title)
-                VStack(alignment: .leading, spacing: 8) {
+                let style = Self.style(for: section.title)
+                VStack(alignment: .leading, spacing: 14) {
                     if !section.title.isEmpty {
-                        Text(section.title.uppercased())
-                            .font(.system(size: 10.5, weight: .bold))
-                            .tracking(0.6)
-                            .foregroundStyle(tint)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(tint.opacity(0.13), in: Capsule())
+                        HStack(spacing: 10) {
+                            Text(section.title.uppercased())
+                                .font(.system(size: 10.5, weight: .bold))
+                                .tracking(0.8)
+                                .foregroundStyle(style.tint)
+                                .fixedSize()
+                            Rectangle().fill(palette.hair).frame(height: 0.5)
+                        }
                     }
                     ForEach(Array(section.items.enumerated()), id: \.offset) { _, item in
-                        HStack(alignment: .firstTextBaseline, spacing: 9) {
-                            Circle().fill(tint).frame(width: 5, height: 5).alignmentGuide(.firstTextBaseline) { $0[.bottom] + 1.5 }
-                            Text(Self.inline(item))
-                                .font(.system(size: 13))
-                                .lineSpacing(2.5)
-                                .foregroundStyle(palette.text)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .textSelection(.enabled)
+                        let parts = Self.split(item)
+                        HStack(alignment: .top, spacing: 12) {
+                            TintTile(style.glyph, tint: style.tint, size: 26, glyphSize: 13, radius: 7)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(Self.inline(parts.headline))
+                                    .font(.system(size: 13.5, weight: parts.detail == nil ? .regular : .semibold))
+                                    .foregroundStyle(palette.text)
+                                if let detail = parts.detail {
+                                    Text(Self.inline(detail))
+                                        .font(.system(size: 12.5))
+                                        .lineSpacing(2)
+                                        .foregroundStyle(palette.text2)
+                                }
+                            }
+                            .fixedSize(horizontal: false, vertical: true)
+                            .textSelection(.enabled)
+                            .padding(.top, 3)
                         }
                     }
                 }
@@ -306,13 +343,24 @@ struct ReleaseNotesList: View {
         }
     }
 
-    private static func tint(for title: String) -> Color {
+    private static func style(for title: String) -> (tint: Color, glyph: Glyph) {
         switch title.lowercased() {
-        case "new", "added": Tint.blue
-        case "improved", "changed": Tint.green
-        case "fixed": Tint.orange
-        default: Tint.grey
+        case "new", "added": (Tint.blue, .plus)
+        case "improved", "changed": (Tint.green, .navCleanup)
+        case "fixed": (Tint.orange, .check)
+        default: (Tint.grey, .arrowRight)
         }
+    }
+
+    /// "**Activity.** See everything…" → ("Activity", "See everything…"). Plain items have no detail.
+    static func split(_ item: String) -> (headline: String, detail: String?) {
+        guard item.hasPrefix("**"), let end = item.range(of: "**", range: item.index(item.startIndex, offsetBy: 2)..<item.endIndex) else {
+            return (item, nil)
+        }
+        var headline = String(item[item.index(item.startIndex, offsetBy: 2)..<end.lowerBound]).trimmingCharacters(in: .whitespaces)
+        if headline.hasSuffix(".") || headline.hasSuffix(":") { headline.removeLast() }
+        let detail = item[end.upperBound...].trimmingCharacters(in: .whitespaces)
+        return (headline, detail.isEmpty ? nil : detail)
     }
 
     /// Keeps **bold**, *italic*, `code` and links from the Markdown source.
