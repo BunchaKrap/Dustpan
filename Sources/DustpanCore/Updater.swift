@@ -213,23 +213,50 @@ public struct GitHubUpdater: Sendable {
 
     // MARK: Installing
 
+    /// Where the install helper writes why a swap failed; the relaunched app reads it to explain the failure.
+    public static var installLog: URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("DustpanUpdate-install.log")
+    }
+
     /// Starts a detached helper that waits for this process to quit, swaps the bundles and relaunches.
-    /// If the swap fails the old app is put back and reopened. Paths are passed as arguments, never interpolated.
-    public static func installAndRelaunch(staged: URL, replacing current: URL, pid: Int32 = ProcessInfo.processInfo.processIdentifier) throws {
-        let backup = current.deletingLastPathComponent().appendingPathComponent(".\(current.lastPathComponent).previous")
+    ///
+    /// The old app is parked inside the update's own staging folder rather than under a fixed name next to it:
+    /// a backup left behind earlier (e.g. root-owned, from the .pkg installer) can then never block the swap.
+    /// If the new app can't be moved in, the old one is put back. Any error goes to `installLog`. Paths are
+    /// passed as arguments, never interpolated.
+    @discardableResult
+    public static func installAndRelaunch(staged: URL, replacing current: URL, pid: Int32 = ProcessInfo.processInfo.processIdentifier,
+                                          relaunch: Bool = true) throws -> Process {
+        // staged is <staging>/unpacked/Dustpan.app
+        let staging = staged.deletingLastPathComponent().deletingLastPathComponent()
+        try? FileManager.default.removeItem(at: installLog)
         let script = """
         while kill -0 "$1" 2>/dev/null; do sleep 0.2; done
-        rm -rf "$4"
-        if mv "$2" "$4" && mv "$3" "$2"; then
-          rm -rf "$4"
-        else
-          [ -e "$2" ] || mv "$4" "$2"
+        parked="$4/previous.app"
+        if mv "$2" "$parked" 2>>"$5"; then
+          if mv "$3" "$2" 2>>"$5"; then
+            rm -rf "$4" 2>/dev/null
+          else
+            mv "$parked" "$2" 2>>"$5"
+          fi
         fi
-        open "$2"
+        [ "$6" = 1 ] && open "$2"
+        exit 0
         """
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/sh")
-        process.arguments = ["-c", script, "dustpan-update", String(pid), current.path, staged.path, backup.path]
+        process.arguments = ["-c", script, "dustpan-update", String(pid), current.path, staged.path, staging.path,
+                             installLog.path, relaunch ? "1" : "0"]
         try process.run()
+        return process
+    }
+
+    /// Removes download folders left by earlier updates. Best effort: some may hold files it can't delete.
+    public static func removeLeftoverDownloads() {
+        let temp = FileManager.default.temporaryDirectory
+        let leftovers = (try? FileManager.default.contentsOfDirectory(at: temp, includingPropertiesForKeys: nil)) ?? []
+        for url in leftovers where url.lastPathComponent.hasPrefix("DustpanUpdate-") && url != installLog {
+            try? FileManager.default.removeItem(at: url)
+        }
     }
 }

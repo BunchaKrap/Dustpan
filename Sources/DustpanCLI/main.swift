@@ -397,6 +397,27 @@ func runSelfTest() async -> Int {
     let wrongVersion = await (try? updater.downloadAndStage(release(digest, version: "9.9.9"))) == nil
     check(wrongVersion, "rejects a build whose version doesn't match the release")
 
+    // A stale, unwritable backup next to the app (as a root-owned one from the .pkg installer is) blocked updates before.
+    let appsFolder = root.appendingPathComponent("Apps")
+    let installed = appsFolder.appendingPathComponent("Dustpan.app")
+    let stale = appsFolder.appendingPathComponent(".Dustpan.app.previous")
+    let staging = root.appendingPathComponent("DustpanUpdate-test/unpacked/Dustpan.app")
+    for (folder, marker) in [(installed, "old"), (staging, "new"), (stale, "stale")] {
+        try! fm.createDirectory(at: folder, withIntermediateDirectories: true)
+        try! marker.write(to: folder.appendingPathComponent("version"), atomically: true, encoding: .utf8)
+    }
+    try! fm.setAttributes([.posixPermissions: 0o555], ofItemAtPath: stale.path)
+    let quitter = Process()
+    quitter.executableURL = URL(fileURLWithPath: "/bin/sleep")
+    quitter.arguments = ["0.3"]
+    try! quitter.run()
+    let helper = try! GitHubUpdater.installAndRelaunch(staged: staging, replacing: installed, pid: quitter.processIdentifier, relaunch: false)
+    helper.waitUntilExit()
+    try! fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: stale.path)
+    check((try? String(contentsOf: installed.appendingPathComponent("version"), encoding: .utf8)) == "new"
+          && !fm.fileExists(atPath: staging.deletingLastPathComponent().deletingLastPathComponent().path),
+          "installs over the app even with a stale backup beside it, and cleans up")
+
     print(failures == 0 ? "\nAll checks passed." : "\n\(failures) check(s) failed.")
     return failures
 }

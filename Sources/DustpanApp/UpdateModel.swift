@@ -34,9 +34,11 @@ final class UpdateModel {
     private var task: Task<Void, Never>?
     private static let lastVersionKey = "lastLaunchedVersion"
     private static let updatedFromKey = "updatedFromVersion"
+    private static let updatingToKey = "updatingToVersion"
 
     init() {
-        showWhatsNewIfUpdated()
+        if !reportFailedUpdate() { showWhatsNewIfUpdated() }
+        Task.detached(priority: .background) { GitHubUpdater.removeLeftoverDownloads() }
     }
 
     var isConfigured: Bool { updater.isConfigured }
@@ -87,11 +89,12 @@ final class UpdateModel {
     }
 
     func installAndRelaunch() {
-        guard case .ready(_, let staged) = phase else { return }
+        guard case .ready(let release, let staged) = phase else { return }
         do {
             try GitHubUpdater.installAndRelaunch(staged: staged, replacing: Bundle.main.bundleURL)
-            // Read back by the new version on launch to show What's New.
+            // Read back on relaunch: What's New if the new version is running, an explanation if it isn't.
             UserDefaults.standard.set(currentVersion, forKey: Self.updatedFromKey)
+            UserDefaults.standard.set(release.version, forKey: Self.updatingToKey)
             NSApp.terminate(nil)
         } catch {
             phase = .failed("Couldn't start the installer: \(error.localizedDescription)")
@@ -128,6 +131,23 @@ final class UpdateModel {
 
     func dismissWhatsNew() {
         isShowingWhatsNew = false
+    }
+
+    /// After Install & Relaunch, if this is still the old version the swap failed. Says so, with macOS's reason,
+    /// instead of quietly reopening the old app. Returns true when it reported a failure.
+    private func reportFailedUpdate() -> Bool {
+        let defaults = UserDefaults.standard
+        guard let target = defaults.string(forKey: Self.updatingToKey) else { return false }
+        defaults.removeObject(forKey: Self.updatingToKey)
+        guard GitHubUpdater.isNewer(target, than: currentVersion) else { return false }
+        defaults.removeObject(forKey: Self.updatedFromKey)
+
+        let log = (try? String(contentsOf: GitHubUpdater.installLog, encoding: .utf8))?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let reason = log.isEmpty ? "" : " macOS said: \(log.split(separator: "\n").first ?? "")."
+        phase = .failed("The update to \(target) didn't install, so you're still on \(currentVersion). Dustpan couldn't replace itself in \(Bundle.main.bundleURL.deletingLastPathComponent().path).\(reason) Try again, or download it from GitHub and drag it into Applications.")
+        isShowingSheet = true
+        return true
     }
 
     /// Runs once per launch, before anything else writes to UserDefaults.

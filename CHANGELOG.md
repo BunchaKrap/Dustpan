@@ -6,6 +6,12 @@ Each release gets a "## <version> — <date>" heading and up to three groups: ##
 release.sh publishes the matching section as the GitHub release notes, and the app shows it after updating.
 -->
 
+## Unreleased
+
+### Fixed
+- Updates install reliably. If you'd first installed Dustpan with the installer package, a leftover backup could stop later updates from replacing the app, and Dustpan quietly reopened the old version.
+- If an update ever can't be installed, Dustpan now says so when it reopens, explains why, and offers to try again.
+
 ## 0.2.3 — 29 October 2026
 
 ### New
